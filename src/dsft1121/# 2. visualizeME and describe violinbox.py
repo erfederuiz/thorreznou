@@ -8,25 +8,28 @@ from scipy.stats import iqr
 from IPython.display import display
 
 
-def visualizeME_and_describe_violinbox(dataframe, categ_var, numeric_var):
+def visualizeME_and_describe_violinbox(dataframe, categ_var, numeric_var, save=True):
     '''
     Function that allows to obtain a more complete graph by merging boxplot and violinplot together with a table of descriptive metrics
-    Parameters (3):
+    Parameters (4):
         dataframe: origin table
         categ_var: categoric variable
         numeric_var: numeric variable
+        save: by default True, the function save the plot and table generated
     '''
     # Generate ViolinBOX graph
-    plt.figure(figsize=(16,10))
+    num_cat = len(list(dataframe[categ_var].unique()))
+    plt.figure(figsize=(num_cat*1.5,8))
     sns.violinplot(x=categ_var, y=numeric_var, data=dataframe, palette='rainbow')
     ax = sns.boxplot(x=categ_var, y=numeric_var, data=dataframe,fliersize=0, color='white')
     ax.set_xticklabels(ax.get_xticklabels(), rotation=40, ha='right');
-    titulo= numeric_var + '_&_' + categ_var
-    plt.title(titulo);
+    titulo= numeric_var.upper() + '_vs_' + categ_var.upper()
+    plt.title(titulo, fontsize=15);
 
     # Save graph
-    graph = 'visualizeME_Graphic_violinbox_' + titulo + '.png'
-    plt.savefig(graph)
+    if save == True:
+        graph = 'visualizeME_Graphic_violinbox_' + titulo + '.png'
+        plt.savefig(graph)
 
     # Metrics table
     cabeceras= ['Metrics',]
@@ -53,8 +56,9 @@ def visualizeME_and_describe_violinbox(dataframe, categ_var, numeric_var):
     table = table.set_index('Metrics')
     
     # Save table
-    name = 'visualizeME_table_violinbox_' + titulo + '.csv'
-    table.to_csv(name, header=True)
+    if save == True:
+        name = 'visualizeME_table_violinbox_' + titulo + '.csv'
+        table.to_csv(name, header=True)
     
     plt.show()
     display(table)
