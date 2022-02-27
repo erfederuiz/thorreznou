@@ -8,19 +8,20 @@ from scipy.stats import iqr
 from IPython.display import display
 
 
-def visualizeME_and_describe_violinbox(dataframe, categ_var, numeric_var, save=True):
+def visualizeME_and_describe_violinbox(dataframe, categ_var, numeric_var, palette= 'tab10', save= True):
     '''
     Function that allows to obtain a more complete graph by merging boxplot and violinplot together with a table of descriptive metrics
-    Parameters (4):
-        dataframe: origin table
-        categ_var: categoric variable
-        numeric_var: numeric variable
-        save: by default True, the function save the plot and table generated
+    ### Parameters (5):
+        * dataframe: `dataframe`  origin table
+        * categ_var: `str` categoric variable
+        * numeric_var:  `str` numeric variable
+        * palette:  `str` by default 'tab10', but you can choose your palette
+        * save:  `bool` by default True, the function save the plot and table generated
     '''
     # Generate ViolinBOX graph
     num_cat = len(list(dataframe[categ_var].unique()))
-    plt.figure(figsize=(num_cat*1.5,8))
-    sns.violinplot(x=categ_var, y=numeric_var, data=dataframe, palette='rainbow')
+    plt.figure(figsize=(num_cat*1.5,10))
+    sns.violinplot(x=categ_var, y=numeric_var, data=dataframe, palette= palette)
     ax = sns.boxplot(x=categ_var, y=numeric_var, data=dataframe,fliersize=0, color='white')
     ax.set_xticklabels(ax.get_xticklabels(), rotation=40, ha='right');
     titulo= numeric_var.upper() + '_vs_' + categ_var.upper()
@@ -28,7 +29,7 @@ def visualizeME_and_describe_violinbox(dataframe, categ_var, numeric_var, save=T
 
     # Save graph
     if save == True:
-        graph = 'visualizeME_Graphic_violinbox_' + titulo + '.png'
+        graph = 'visualizeME_Graphic_violinbox_' + titulo.lower() + '.png'
         plt.savefig(graph)
 
     # Metrics table
@@ -57,7 +58,7 @@ def visualizeME_and_describe_violinbox(dataframe, categ_var, numeric_var, save=T
     
     # Save table
     if save == True:
-        name = 'visualizeME_table_violinbox_' + titulo + '.csv'
+        name = 'visualizeME_table_violinbox_' + titulo.lower() + '.csv'
         table.to_csv(name, header=True)
     
     plt.show()

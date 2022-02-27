@@ -18,11 +18,11 @@ from PIL import Image
 def visualizeME_palettes_or_colors(selection = 'palette', quantity_colors= 8):
     '''
     Function that returns the possible color palettes of the Seaborn library
-    Parameters (2):
-        selection: by default gives 'palettes', but you can choose colors
-        quantity_colors: by default it returns 8 colors per palette, you can change number of colors you will need. And if you want to see colors, it is not neccesary this parameter.
-    Return (1):
-        plt.show(): available palettes/ colors with their respective names
+    ### Parameters (2):
+        * selection: `str` by default gives 'palettes', but you can choose colors
+        * quantity_colors: `int` by default it returns 8 colors per palette, you can change number of colors you will need. And if you want to see colors, it is not neccesary this parameter.
+    ### Return (1):
+        * plt.show(): available palettes/ colors with their respective names
     '''
     colors = pd.read_csv('data/seaborn_color_list.csv')
 
@@ -61,23 +61,24 @@ def visualizeME_palettes_or_colors(selection = 'palette', quantity_colors= 8):
             pos = pos + 1
 
     plt.tight_layout()
-    return plt.show() 
+    return plt.show()
 
 
 # FUNCION 2
-def visualizeME_and_describe_violinbox(dataframe, categ_var, numeric_var, save=True):
+def visualizeME_and_describe_violinbox(dataframe, categ_var, numeric_var, palette= 'tab10', save= True):
     '''
     Function that allows to obtain a more complete graph by merging boxplot and violinplot together with a table of descriptive metrics
-    Parameters (4):
-        dataframe: origin table
-        categ_var: categoric variable
-        numeric_var: numeric variable
-        save: by default True, the function save the plot and table generated
+    ### Parameters (5):
+        * dataframe: `dataframe`  origin table
+        * categ_var: `str` categoric variable
+        * numeric_var:  `str` numeric variable
+        * palette:  `str` by default 'tab10', but you can choose your palette
+        * save:  `bool` by default True, the function save the plot and table generated
     '''
     # Generate ViolinBOX graph
     num_cat = len(list(dataframe[categ_var].unique()))
-    plt.figure(figsize=(num_cat*1.5,8))
-    sns.violinplot(x=categ_var, y=numeric_var, data=dataframe, palette='rainbow')
+    plt.figure(figsize=(num_cat*1.5,10))
+    sns.violinplot(x=categ_var, y=numeric_var, data=dataframe, palette= palette)
     ax = sns.boxplot(x=categ_var, y=numeric_var, data=dataframe,fliersize=0, color='white')
     ax.set_xticklabels(ax.get_xticklabels(), rotation=40, ha='right');
     titulo= numeric_var.upper() + '_vs_' + categ_var.upper()
@@ -122,26 +123,27 @@ def visualizeME_and_describe_violinbox(dataframe, categ_var, numeric_var, save=T
 
 
 # FUNCION 3
-def visualizeME_and_describe_barplot(dataframe, categ_var, numeric_var, save = True):
+def visualizeME_and_describe_barplot(dataframe, categ_var, numeric_var, palette='tab10', save = True):
     '''
     Function that allows to obtain a barplot with a table of descriptive metrics
-    Parameters (4):
-        dataframe: origin table
-        categ_var: categoric variable
-        numeric_var: numeric variable
-        save: by default True, the function save the plot and table generated
+    ### Parameters (5):
+        * dataframe: `dataframe`  origin table
+        * categ_var: `str` categoric variable
+        * numeric_var:  `str` numeric variable
+        * palette:  `str` by default 'tab10', but you can choose your palette
+        * save:  `bool` by default True, the function save the plot and table generated
     '''
     # Graph
     num_cat = len(list(dataframe[categ_var].value_counts().index[::-1]))
     plt.figure(figsize=(num_cat*1.5,8))
-    ax = sns.barplot(x= categ_var,y= numeric_var, data= dataframe, order= dataframe[categ_var].value_counts().index[::-1], ci=None)
+    ax = sns.barplot(x= categ_var,y= numeric_var, data= dataframe, palette= palette, order= dataframe[categ_var].value_counts().index[::-1], ci=None)
     ax.set_xticklabels(ax.get_xticklabels(), rotation=40, ha='right');
     titulo= numeric_var.upper() + ' vs. ' + categ_var.upper()
     plt.title(titulo, fontsize=15)
     
     # Save graph
     if save == True:
-        path=os.path.join(titulo.lower() + '.' + 'png')
+        path=os.path.join('visualizeME_Graphic_barplot_' + titulo.lower() + '.' + 'png')
         plt.savefig(path, format='png', dpi=300)
     
     # Metrics table
@@ -416,18 +418,18 @@ def visualizeME_c_matrix(y_true,
 def visualizeME_FigureWords(dataframe, categ_var, shape= 'seahorse', cmap= 'tab10', contour= 'steelblue', back_color = 'white', height= 18, width = 20, save= True):
     '''
     Function that returns graph of words with different shapes, with the possibility to choose between 'dino', 'heart', 'star', 'seahorse' and 'hashtag'. I hope you like it!
-    Parameters (9):
-        dataframe: origin table
-        categ_var: categoric variable
-        shape: by default is 'seahorse' shape, but you can choose from this list: 'seahorse', 'dino', 'heart', 'star' and 'hashtag'.
-        cmap: by default is 'tab10', but you can choose your palette of Seaborn. If you want to know which palettes are available you can call visualizeME_colors_palettes() function
-        contour: by default is 'steelblue', but you can choose your favourite color
-        back_color: by default is 'white', but you can choose your background color
-        height: by default is 18, but you can select your preference on height of the figure
-        width:by default is 20, but you can select your preference on width of the figure
-        save: by default is True in order to save your graph, but if you prefer don't save it, just choose 'False'
-    Return (1):
-        plt.show(): graph with your figure(by default will be seahorse)
+    ### Parameters (9):
+        * dataframe: `dataframe` origin table
+        * categ_var: `str` categoric variable
+        * shape: `str` by default is 'seahorse' shape, but you can choose from this list: 'seahorse', 'dino', 'heart', 'star' and 'hashtag'.
+        * cmap: `str` by default is 'tab10', but you can choose your palette of Seaborn. If you want to know which palettes are available you can call visualizeME_colors_palettes() function
+        * contour: `str` by default is 'steelblue', but you can choose your favourite color
+        * back_color: `str` by default is 'white', but you can choose your background color
+        * height: `int` by default is 18, but you can select your preference on height of the figure
+        * width:`int` by default is 20, but you can select your preference on width of the figure
+        * save: `bool` by default is True in order to save your graph, but if you prefer don't save it, just choose 'False'
+    ### Return (1):
+        * plt.show(): graph with your figure(by default will be seahorse)
     '''
     # Shape
     while shape not in ['dino', 'heart', 'star', 'seahorse', 'hashtag']:    
@@ -463,7 +465,7 @@ def visualizeME_FigureWords(dataframe, categ_var, shape= 'seahorse', cmap= 'tab1
     if save == True:
         figure = figure.split('/')[1]
         figure = figure.split('.')[0]
-        name = figure + '_visualizeME_Graphic.png'
+        name = 'visualizeME_Graphic_' + figure + '.png'
         plt.savefig(name)
     
     return plt.show()

@@ -9,11 +9,11 @@ import matplotlib.pyplot as plt
 def visualizeME_palettes_or_colors(selection = 'palette', quantity_colors= 8):
     '''
     Function that returns the possible color palettes of the Seaborn library
-    Parameters (2):
-        selection: by default gives 'palettes', but you can choose colors
-        quantity_colors: by default it returns 8 colors per palette, you can change number of colors you will need. And if you want to see colors, it is not neccesary this parameter.
-    Return (1):
-        plt.show(): available palettes/ colors with their respective names
+    ### Parameters (2):
+        * selection: `str` by default gives 'palettes', but you can choose colors
+        * quantity_colors: `int` by default it returns 8 colors per palette, you can change number of colors you will need. And if you want to see colors, it is not neccesary this parameter.
+    ### Return (1):
+        * plt.show(): available palettes/ colors with their respective names
     '''
     colors = pd.read_csv('data/seaborn_color_list.csv')
 

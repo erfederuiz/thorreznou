@@ -11,16 +11,18 @@ from PIL import Image
 def visualizeME_FigureWords(dataframe, categ_var, shape= 'seahorse', cmap= 'tab10', contour= 'steelblue', back_color = 'white', height= 18, width = 20, save= True):
     '''
     Function that returns graph of words with different shapes, with the possibility to choose between 'dino', 'heart', 'star', 'seahorse' and 'hashtag'. I hope you like it!
-    Parameters (9):
-        dataframe: origin table
-        categ_var: categoric variable
-        shape: by default is 'seahorse' shape, but you can choose from this list: 'seahorse', 'dino', 'heart', 'star' and 'hashtag'.
-        cmap: by default is 'tab10', but you can choose your palette of Seaborn. If you want to know which palettes are available you can call visualizeME_colors_palettes() function
-        contour: by default is 'steelblue', but you can choose your favourite color
-        back_color: by default is 'white', but you can choose your background color
-        height: by default is 18, but you can select your preference on height of the figure
-        width:by default is 20, but you can select your preference on width of the figure
-        save: by default is True in order to save your graph, but if you prefer don't save it, just choose 'False'
+    ### Parameters (9):
+        * dataframe: `dataframe` origin table
+        * categ_var: `str` categoric variable
+        * shape: `str` by default is 'seahorse' shape, but you can choose from this list: 'seahorse', 'dino', 'heart', 'star' and 'hashtag'.
+        * cmap: `str` by default is 'tab10', but you can choose your palette of Seaborn. If you want to know which palettes are available you can call visualizeME_colors_palettes() function
+        * contour: `str` by default is 'steelblue', but you can choose your favourite color
+        * back_color: `str` by default is 'white', but you can choose your background color
+        * height: `int` by default is 18, but you can select your preference on height of the figure
+        * width:`int` by default is 20, but you can select your preference on width of the figure
+        * save: `bool` by default is True in order to save your graph, but if you prefer don't save it, just choose 'False'
+    ### Return (1):
+        * plt.show(): graph with your figure(by default will be seahorse)
     '''
     # Shape
     while shape not in ['dino', 'heart', 'star', 'seahorse', 'hashtag']:    
@@ -56,7 +58,7 @@ def visualizeME_FigureWords(dataframe, categ_var, shape= 'seahorse', cmap= 'tab1
     if save == True:
         figure = figure.split('/')[1]
         figure = figure.split('.')[0]
-        name = figure + '_visualizeME_Graphic.png'
+        name = 'visualizeME_Graphic_' + figure + '.png'
         plt.savefig(name)
     
-    plt.show()
+    return plt.show()
