@@ -1,8 +1,9 @@
- 
+
 # resize list of images to same sizes / dimensions
 def resize_image(directory_path,
                 pixels_1,
                 pixels_2,
+                bw = False,
                 img_name_list= None,
                 zip_file = False):
     '''   
@@ -18,8 +19,8 @@ def resize_image(directory_path,
     '''
 
 
-    from cv2 import imread , resize
-    from os import listdir , remove , walk
+    from cv2 import imread , resize , IMREAD_GRAYSCALE
+    from os import remove , walk
     from os.path import splitext
     import zipfile
     from pathlib import PurePath
@@ -76,7 +77,10 @@ def resize_image(directory_path,
               len(img_path_list), '------- Final shape: %sx%s pixels' % (pixels_1 , pixels_2))
         
         for image_path in img_path_list:
-            img = imread(str(image_path))
+            if bw:
+                img = imread(str(image_path) , flags=IMREAD_GRAYSCALE)
+            else:
+                img = imread(str(image_path))
             image = resize(img, (pixels_1, pixels_2))
             re_image_list.append(image)     
         
@@ -115,7 +119,10 @@ def resize_image(directory_path,
               len(img_name_list), '------- Final shape: %sx%s pixels' % (pixels_1 , pixels_2))
         
         for image_path in img_path_list:
-            img = imread(str(image_path))
+            if bw:
+                img = imread(str(image_path) , flags=IMREAD_GRAYSCALE)
+            else:
+                img = imread(str(image_path))
             image = resize(img, (pixels_1, pixels_2))
             re_image_list.append(image)
         
