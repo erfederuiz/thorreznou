@@ -19,13 +19,29 @@ def visualize_c_matrix(y_true,
                        cmap='',
                        cbar=True,
                        metrics=True,
-                       save=False):
+                       save=True):
     '''
-    This function plots a prettier confusion matrix with useful annotations
+    This function plots a prettier confusion matrix with useful annotations 
+       
     and adds a pd.DataFrame with the most common metrics used in classification.
-    
+        
     You can use this function with binary or multiclass classification.
     
+    The figsize is calculated based on the number of categories.
+        
+    For both cases:
+        * In the main diagonal you get:
+            * counts over total of class
+            * percentaje over total observations
+        * In the rest of the cells you get:
+            * counts
+            * percentaje over total observations
+        * If counts is zero you get an empty cell
+           
+    In case the function founds binary catergories in your data then a binary
+    
+    matrix is displayed with the TN, FN, FP, TP tags.
+         
     ### Parameters:
     
         y_true -- `array_like`
@@ -35,13 +51,13 @@ def visualize_c_matrix(y_true,
             Predictions to compare with true labels.
 
         title='' -- `str`
-            Title to be displayed and used to save to file.
+            Title to be displayed and used to save file.
 
         categories=[] -- `list(str)`
             List of names of the classes to be displayed instead of numeric values.
 
         rotate=False -- `bool`
-            Applies a rotation on ticklabels to show them in case they overlap.
+            Applies a rotation on xticklabels in case they overlap.
 
         cmap='' -- `Matplotlib colormap name or object, or list of colors` 
             If not provided default is 'Blues'.
@@ -60,17 +76,6 @@ def visualize_c_matrix(y_true,
         cfm -- `sklearn.metrics.confusion_matrix`
         
         metrics -- `pd.DataFrame`
-        
-        
-    ### References:
-        This function was inspired by:
-        
-         @hitvoice - https://gist.github.com/hitvoice/36cf44689065ca9b927431546381a3f7
-         
-         @DTrimarchi10 - https://github.com/DTrimarchi10/confusion_matrix
-         
-         @Yash Nag - https://stackoverflow.com/questions/39662398/scikit-learn-output-metrics-classification-report-into-csv-tab-delimited-format
-
     '''
                          
     # Generate confusion matrix
@@ -78,11 +83,22 @@ def visualize_c_matrix(y_true,
     
     # Set tipe of classifier: binary or not binary
     if len(cfm)==2:
+        base = len(cfm)
         bin_classifier = True
-        annot_kws = {"size": 20}
+        annot_kws = {"size": 10*base}
+        title_fontsize = 12*base
+        axis_fontsize = 10*base
+        labels_fontsize = 10*base
+        plt.figure(figsize=(4.5*base, 4.5*base))
+        
     else:
+        base = len(cfm)
         bin_classifier = False    
-        annot_kws = {"size": 10}
+        annot_kws = {"size": 1.5*base}
+        title_fontsize = 3.5*base
+        axis_fontsize = 2.5*base
+        labels_fontsize = 1.5*base
+        plt.figure(figsize=(1.75*base, 1.75*base))
     
     # Calculate auxiliar data   
     cfm_rowsum  = np.sum(cfm, axis=1, keepdims=True)
@@ -137,56 +153,53 @@ def visualize_c_matrix(y_true,
     # Add label rotation        
     if rotate:
         xdegree=50
-        ydegree=50
+        plt.yticks(rotation=0)
     else:
         xdegree=0
-        ydegree=90
+        plt.yticks(rotation=0)
     
     # Set title label
     if title == '':
-        title = 'CLASSIFIER'
+        title = 'TRUE LABEL VS. PREDICTED LABEL'
     else:
         pass
     
-    ax.set_title(f'{title.upper()}', fontsize=25)
+    ax.set_title(f'{title.upper()}', fontsize=title_fontsize)
     
     # Set axis labels
-    ax.set_xlabel('PREDICTED LABEL', fontsize=20)
+    ax.set_xlabel('PREDICTED LABEL', fontsize=axis_fontsize)
     ax.xaxis.set_label_position('bottom')
-    ax.set_ylabel('TRUE LABEL', fontsize=20)
+    ax.set_ylabel('TRUE LABEL', fontsize=axis_fontsize)
     ax.yaxis.set_label_position('left')
     
     # Set tick labels
     # Define category names
     if categories != []:
-        # if len()
-        # raise Exception("Sorry, no numbers below zero")
         try:
-            categories = [label.upper() for label in categories]
+            categories = [label for label in categories]
             ax.set_xticks(cat_position)
-            ax.set_xticklabels(categories, fontsize=15, rotation=xdegree)
+            ax.set_xticklabels(categories, fontsize=labels_fontsize, rotation=xdegree)
             ax.xaxis.tick_bottom()
             
-            ax.set_yticklabels(categories, fontsize=15, rotation=ydegree)
+            ax.set_yticklabels(categories, fontsize=labels_fontsize)
             ax.yaxis.tick_left()
 
         except ValueError:
             print('''Impossible to parse categories with number of classes. Ticklabels set to numeric.''')
             
-    
-    # Plot
-    plt.show()
-    
     # Save plot
     if save:
         name = 'visualizeME_cf_matrix_' + title.lower() + '.png'
-        path=os.path.join(title + '.' + 'png')
+        path=os.path.join(name + '.' + 'png')
         plt.savefig(path, format='png', dpi=300)
+
+    # Plot
+    plt.show()
         
     # Calculate metrics
     if metrics:
         if bin_classifier:
-            metrics = pd.DataFrame({title: [f'{accuracy_score(y_true, y_pred):.10f}',
+            metrics_df = pd.DataFrame({title: [f'{accuracy_score(y_true, y_pred):.10f}',
                                             f'{precision_score(y_true, y_pred):.10f}',
                                             f'{recall_score(y_true, y_pred):.10f}',
                                             f'{f1_score(y_true, y_pred):.10f}',
@@ -218,14 +231,14 @@ def visualize_c_matrix(y_true,
             index.append('WEIGHTED AVG.')
             values.append([x for x in report[-1] if x != ''][-4:])
 
-            metrics = pd.DataFrame(data=values, columns=header, index=index)
+            metrics_df = pd.DataFrame(data=values, columns=header, index=index)
 
         # Plot metrics
-        display(metrics)
+        display(metrics_df)
     
     # Save metrics
     if save:
         name = 'visualizeME_cf_matrix_' + title.lower() + '.csv'
-        metrics.to_csv(name, header=True)
-    
+        metrics_df.to_csv(name, header=True)
+
     return cfm, metrics
