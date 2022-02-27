@@ -1,10 +1,13 @@
 from imblearn.over_sampling import SMOTE
 from imblearn.under_sampling import RandomUnderSampler
+from sklearn.linear_model import LinearRegression, Ridge, Lasso, ElasticNet, LogisticRegression
 from sklearn.model_selection import train_test_split, GridSearchCV
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
+from sklearn.preprocessing import StandardScaler, MinMaxScaler, PolynomialFeatures
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, mean_absolute_error, \
+    mean_squared_error, mean_absolute_percentage_error
 from sklearn.ensemble import RandomForestClassifier
 import pandas as pd
+import numpy as np
 
 
 def divide(dataset, target_column):
@@ -79,9 +82,8 @@ def model_scoring_classification(name, model, X_test, y_test):
     Calculates model scoring for classification models
     :param str name: Column name
     :param model: Trained model to get metrics of
-    :param x: X
-    :param y: y
-    :param set:
+    :param X_test: X
+    :param y_test: y
     :return: metrics
     """
     name = f'{name.upper()} (test data)'
@@ -94,6 +96,28 @@ def model_scoring_classification(name, model, X_test, y_test):
                                    f'{roc_auc_score(y_test, preds):.10f}']},
                            index=[['Accuracy (TP + TN/TT)', 'Precision (TP/TP + FP)', 'Recall (TP/TP + FN)',
                                    'F1 (har_mean Ac, Re)', 'ROC AUC']])
+
+    return metrics
+
+
+def model_scoring_regression(name, model, X_test, y_test):
+    """
+    Calculates model scoring for regression models
+    :param str name: Column name
+    :param model: Trained model to get metrics of
+    :param X_test: X
+    :param y_test: y
+    :return: metrics
+    """
+    name = f'{name.upper()} ({set} data)'
+    preds = model.predict(X_test)
+
+    metrics = pd.DataFrame({name: [f'{model.score(X_test, y_test):.10f}',
+                                   f'{mean_absolute_error(y_test, preds):.10f}',
+                                   f'{mean_absolute_percentage_error(y_test, preds):.10f}',
+                                   f'{mean_squared_error(y_test, preds):.10f}',
+                                   f'{np.sqrt(mean_squared_error(y_test, preds)):.10f}']},
+                           index=[['Score (R2 coef.)', 'MAE', 'MAPE', 'MSE', 'RMSE']])
 
     return metrics
 
@@ -121,7 +145,70 @@ def random_forest_classif(X_train, X_test, y_train, y_test):
 
     metrics = model_scoring_classification('RandomForest', model_fit, X_test, y_test)
 
-    return model_fit, grid, metrics
+    return model_fit, metrics, grid
+
+
+def SVC(X_train, y_train, X_test, y_test):
+    """
+    Función para implementar un algoritmo de clasificación tipo Support Vector Machine Classifier.
+    El algoritmo se prueba con valores: C = np.arange(0.1, 0.9, 0.1); "gamma": scale, auto;
+                                        "coef0": [-10,-1,0,0.1,0.5,1,10,100]; kernel = linear, poly, rbf
+    Se hace un GridSearchCV con cv = 10 y de scoring la métrica "accuracy"
+
+    :param X_train: X_train
+    :param y_train: y_train
+    :param X_test: X_test
+    :param y_test: y_test
+
+    :return: fitted model, grid and metrics
+    """
+
+    svc = SVC()
+
+    svc_param = {
+        "svc__C": np.arange(0.1, 0.9, 0.1),
+        "gamma": ["scale", "auto"],
+        "coef0": [-10, -1, 0, 0.1, 0.5, 1, 10, 100],
+        "svc__kernel": ["linear", "poly", "rbf"]
+    }
+
+    grid = GridSearchCV(svc, svc_param, cv=10, scoring='accuracy', n_jobs=-1, verbose=1)
+
+    model_fit = grid.fit(X_train, y_train)
+
+    metrics = model_scoring_classification('SVC', model_fit, X_test, y_test)
+
+    return model_fit, metrics, grid
+
+
+def LogistRegress(X_train, y_train, X_test, y_test):
+    """
+    Función para implementar un algoritmo de clasificación tipo LogisticRegression.
+    El algoritmo se prueba con valores: C = np.arange(0.1, 4, 0.5); classifier__penalty: l1, l2
+    Se hace un GridSearchCV con cv = 10 y de scoring la métrica "accuracy"
+
+    :param X_train: X_train
+    :param y_train: y_train
+    :param X_test: X_test
+    :param y_test: y_test
+
+    :return: fitted model, grid and metrics
+    """
+
+    log_reg = LogisticRegression()
+
+    log_param = {
+        'classifier__penalty': ['l1', 'l2'],
+        'classifier__C': np.arange(0.1, 4, 0.5)
+    }
+
+    grid = GridSearchCV(log_reg, log_param, cv=10, scoring='accuracy', n_jobs=-1, verbose=1)
+
+    model_fit = grid.fit(X_train, y_train)
+
+    metrics = model_scoring_classification('LogisticRegression', model_fit, X_test, y_test)
+
+    return model_fit, metrics, grid
 
 
 def best_classif_model(dataset, target_column, sampler_type, scaler_type, test_size):
@@ -141,12 +228,92 @@ def best_classif_model(dataset, target_column, sampler_type, scaler_type, test_s
     sets = prepare_data(dataset, target_column, sampler_type, scaler_type, test_size)
 
     for i in range(len(sets)):
+        # RandomForestClassifier
         model, grid, model_metrics = random_forest_classif(sets[0], sets[1], sets[2], sets[3])
         results.append({
-            'name': 'RandomForestClassifier',
+            'name': f'RandomForestClassifier {i}',
             'model': model,
             'grid': grid
         })
         pd.concat([metrics, model_metrics], axis=1)
 
+        # SVC
+        model, grid, model_metrics = SVC(sets[0], sets[1], sets[2], sets[3])
+        results.append({
+            'name': f'SVC {i}',
+            'model': model,
+            'grid': grid
+        })
+        pd.concat([metrics, model_metrics], axis=1)
+
+        # LogisticRegression
+        model, grid, model_metrics = SVC(sets[0], sets[1], sets[2], sets[3])
+        results.append({
+            'name': f'LogisticRegression {i}',
+            'model': model,
+            'grid': grid
+        })
+        pd.concat([metrics, model_metrics], axis=1)
+
+        # KNN
+
     return results, metrics
+
+
+def poly_reg(X, y, X_train, y_train, X_test, y_test, regular_type=None):
+    """
+
+    Apply a polynomial regression model with 3 polynomial levels
+
+    :param X: to apply PolynomialFeatures to X dataset (before split in train, test)
+    :param y: to apply PolynomialFeatures to y dataset (before split in train, test)
+    :param X_train
+    :param y_train
+    :param X_test
+    :param y_test
+    :param regular_type: type of Regularization (ridge, lasso, elasticnet)
+    :return model_fit, metrics: trained model and metrics
+    """
+
+    poly_feats = PolynomialFeatures(degree=3)
+
+    poly_feats.fit(X)
+
+    X_poly = poly_feats.transform(X)
+
+    pol_reg = LinearRegression()
+
+    model_fit = pol_reg.fit(X_poly, y)
+
+    metrics = model_scoring_regression('PolynomialRegression', model_fit, X_test, y_test)
+
+    # Regularization if needed
+
+    sets = []
+
+    if regular_type == 'ridge':
+        ridgeR = Ridge(alpha=10)
+        ridgeR.fit(X_train, y_train)
+        y_pred = ridgeR.predict(X_test)
+        ridge_error = mean_squared_error(y_pred, y_test)
+        sets.append(ridge_error)
+
+    elif regular_type == 'lasso':
+        lassoR = Lasso(alpha=1)
+        lassoR.fit(X_train, y_train)
+        y_pred = lassoR.predict(X_test)
+        lassoR_error = mean_squared_error(y_pred, y_test)
+        sets.append(lassoR_error)
+
+    elif regular_type == 'elasticnet':
+        elastic_net = ElasticNet(alpha=1, l1_ratio=0.5)
+        elastic_net.fit(X_train, y_train)
+        y_pred = elastic_net.predict(X_test)
+        elastic_net_error = mean_squared_error(y_pred, y_test)
+        sets.append(elastic_net)
+
+    elif regular_type == 'None':
+
+        print("Regularization not necessary")
+
+    return model_fit, metrics, sets
