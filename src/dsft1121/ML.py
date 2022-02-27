@@ -1,8 +1,9 @@
 from imblearn.over_sampling import SMOTE
 from imblearn.under_sampling import RandomUnderSampler
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
+from sklearn.ensemble import RandomForestClassifier
 import pandas as pd
 
 
@@ -72,6 +73,7 @@ def prepare_data(dataset, target_column, sampler_type=None, scaler_type='std', t
 
     return scaled_sets
 
+
 def model_scoring_classification(name, model, X_test, y_test):
     """
     Calculates model scoring for classification models
@@ -95,29 +97,56 @@ def model_scoring_classification(name, model, X_test, y_test):
 
     return metrics
 
-def model_scoring_classification(name, model, X_test, y_test):
+
+def random_forest_classif(X_train, X_test, y_train, y_test):
     """
-    Calculates model scoring for classification models
-    :param str name: Column name
-    :param model: Trained model to get metrics of
-    :param x: X
-    :param y: y
-    :param set:
-    :return: metrics
+    Función para implementar un algoritmo de clasificación tipo RandomForestClassifier.
+    El algoritmo se prueba con valores: n_estimator = 100, 200, 400, 600, 800; max_features = 2, 4 6
+    Se hace un GridSearchCV con cv = 10 y de scoring la métrica "accuracy"
+
+    Parámetros: X_train, y_train, X_test, y_test
+
+    :return: el modelo entrenado, best_estimator, best_params y best_score basado en accuracy
     """
-    name = f'{name.upper()} ({set} data)'
-    preds = model.predict(X_test)
+    rand_forest = RandomForestClassifier()
 
-    metrics = pd.DataFrame({name: [f'{accuracy_score(y_test, preds):.10f}',
-                                   f'{precision_score(y_test, preds):.10f}',
-                                   f'{recall_score(y_test, preds):.10f}',
-                                   f'{f1_score(y_test, preds):.10f}',
-                                   f'{roc_auc_score(y_test, preds):.10f}']},
-                           index=[['Accuracy (TP + TN/TT)', 'Precision (TP/TP + FP)', 'Recall (TP/TP + FN)',
-                                   'F1 (har_mean Ac, Re)', 'ROC AUC']])
+    rand_forest_param = {
+        'n_estimators': [100, 200, 400, 600, 800],
+        'max_features': [2, 4, 6]
+    }
 
-    return metrics
+    grid = GridSearchCV(rand_forest, rand_forest_param, cv=10, scoring='accuracy', n_jobs=-1, verbose=1)
+
+    model_fit = grid.fit(X_train, y_train)
+
+    metrics = model_scoring_classification('RandomForest', model_fit, X_test, y_test)
+
+    return model_fit, grid, metrics
 
 
-data = pd.read_csv('https://projects.danielvivas.com/librarytemp/movies.csv')
-prepare_data(data, 'genre', scaler_type=None)
+def best_classif_model(dataset, target_column, sampler_type, scaler_type, test_size):
+    """
+        Tests several models with given dataset and returns list with models, grids and a metrics dataset
+
+        :param pandas dataset: Dataset we are working with
+        :param str target_column: Target column name
+        :param str sampler_type: Sampling to be applied. Accepts under, SMOTE, both and none
+        :param str scaler_type: Scaler to be applied. Accepts std, minmax and None
+        :param float test_size: Test size
+        :return list: tuple list with X and y and sampled X and y
+    """
+    results = []
+    metrics = pd.DataFrame()
+
+    sets = prepare_data(dataset, target_column, sampler_type, scaler_type, test_size)
+
+    for i in range(len(sets)):
+        model, grid, model_metrics = random_forest_classif(sets[0], sets[1], sets[2], sets[3])
+        results.append({
+            'name': 'RandomForestClassifier',
+            'model': model,
+            'grid': grid
+        })
+        pd.concat([metrics, model_metrics], axis=1)
+
+    return results, metrics
