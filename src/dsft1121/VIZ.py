@@ -10,34 +10,56 @@ import os
 from sklearn.metrics import accuracy_score, confusion_matrix, f1_score, precision_score, recall_score, roc_auc_score
 from sklearn.metrics import classification_report
 
+from wordcloud import WordCloud
+from PIL import Image
+
 
 # FUNCION 1
-def visualizeME_colors_palettes(quantity_colors= 8):
+def visualizeME_palettes_or_colors(selection = 'palette', quantity_colors= 8):
     '''
     Function that returns the possible color palettes of the Seaborn library
-    Parameters (1):
-        quantity_colors: number of colors you need, by default it returns 8 colors per palette
+    Parameters (2):
+        selection: by default gives 'palettes', but you can choose colors
+        quantity_colors: by default it returns 8 colors per palette, you can change number of colors you will need. And if you want to see colors, it is not neccesary this parameter.
     Return (1):
-        plt.show(): available color palettes with their respective names
+        plt.show(): available palettes/ colors with their respective names
     '''
-    colors = pd.read_csv('seaborn_color_list.csv')
-    options_colors = colors['PALETTE_COLORS'].dropna().sort_values(key=lambda x: x.str.lower())
-    grid = np.vstack((np.linspace(0, 1, quantity_colors), np.linspace(0, 1, quantity_colors)))
-    col = 5                       
-    row = int(len(options_colors)/col)+1   
-    pos = 1  
+    colors = pd.read_csv('data/seaborn_color_list.csv')
 
-    plt.figure(figsize=(col*4,row))
-    for i in options_colors:
-        if '_r' in i:
-            pass
-        else:
+    if selection == 'palette':
+        grid = np.vstack((np.linspace(0, 1, quantity_colors), np.linspace(0, 1, quantity_colors)))
+        options_colors = colors['PALETTE_COLORS'].dropna().sort_values(key=lambda x: x.str.lower())
+        col = 4                             
+        pos = 1 
+        row = int(len(options_colors)/col)+1 
+        plt.figure(figsize=(col*4,row))
+
+        for i in options_colors:
+            if '_r' in i:
+                pass
+            else:
+                plt.subplot(row, col, pos)
+                plt.imshow(grid, cmap = i, aspect='auto')
+                plt.axis('off')
+                plt.title(i, loc = 'center', fontsize = 20)
+                pos = pos + 1
+    
+        print('If you want any palette reversed, just add "_r" at the end of the palette name')
+
+    elif selection == 'color':
+        just_colors = sorted(colors['CSS4_COLORS'].dropna().sort_values(key=lambda x: x.str.lower()))
+        col = 4                             
+        pos = 1 
+        row = int(len(just_colors)/col)+1 
+        plt.figure(figsize=(col*3,row))
+        
+        for i in just_colors:
             plt.subplot(row, col, pos)
-            pos = pos + 1
-            plt.imshow(grid, cmap = i, aspect='auto')
+            plt.hlines(0,0,5, color = i ,linestyles = 'solid', linewidth = 25)
             plt.axis('off')
-            plt.title(i, loc = 'center', fontsize = 20)
-    print('If you want any palette reversed, just add "_r" at the end of the palette name')        
+            plt.text(0,0.04, i, fontsize = 20)
+            pos = pos + 1
+
     plt.tight_layout()
     return plt.show() 
 
@@ -388,3 +410,60 @@ def visualizeME_c_matrix(y_true,
         metrics_df.to_csv(name, header=True)
 
     return cfm, metrics
+
+
+# FUNCION 5
+def visualizeME_FigureWords(dataframe, categ_var, shape= 'seahorse', cmap= 'tab10', contour= 'steelblue', back_color = 'white', height= 18, width = 20, save= True):
+    '''
+    Function that returns graph of words with different shapes, with the possibility to choose between 'dino', 'heart', 'star', 'seahorse' and 'hashtag'. I hope you like it!
+    Parameters (9):
+        dataframe: origin table
+        categ_var: categoric variable
+        shape: by default is 'seahorse' shape, but you can choose from this list: 'seahorse', 'dino', 'heart', 'star' and 'hashtag'.
+        cmap: by default is 'tab10', but you can choose your palette of Seaborn. If you want to know which palettes are available you can call visualizeME_colors_palettes() function
+        contour: by default is 'steelblue', but you can choose your favourite color
+        back_color: by default is 'white', but you can choose your background color
+        height: by default is 18, but you can select your preference on height of the figure
+        width:by default is 20, but you can select your preference on width of the figure
+        save: by default is True in order to save your graph, but if you prefer don't save it, just choose 'False'
+    Return (1):
+        plt.show(): graph with your figure(by default will be seahorse)
+    '''
+    # Shape
+    while shape not in ['dino', 'heart', 'star', 'seahorse', 'hashtag']:    
+        shape = input('Try again, what shape do you want for your figure words graph?\n*Dino\n*Heart\n*Star\n*Seahorse: ').lower()
+    if shape == 'seahorse':
+        figure = 'data/seahorse_visualizeME.jpg'
+    elif shape == 'dino':
+        figure = 'data/dino_steg_visualizeME.jpg'
+    elif shape == 'heart': 
+        figure = 'data/corazon_visualizeME.png'
+    elif shape == 'star':
+        figure = 'data/estrella-silueta_visualizeME.png'  
+    elif shape == 'hashtag':
+        figure = 'data/hashtag-silueta_visualizeME.png'
+    
+    # Words
+    words = ' '.join(map(str, dataframe[categ_var]))
+    custom_mask = np.array(Image.open(figure))
+    wordcloud = WordCloud(background_color=back_color,
+                      width=2500,
+                      height=2000,
+                      max_words=500, 
+                      contour_width=0.1, 
+                      contour_color= contour, 
+                      colormap= cmap,
+                      scale =5,mask=custom_mask).generate(words)
+    
+    plt.figure(1, figsize = (height, width))
+    plt.imshow(wordcloud, interpolation='bilinear')
+    plt.axis('off')
+
+    # Save Graph
+    if save == True:
+        figure = figure.split('/')[1]
+        figure = figure.split('.')[0]
+        name = figure + '_visualizeME_Graphic.png'
+        plt.savefig(name)
+    
+    return plt.show()
