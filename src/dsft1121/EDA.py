@@ -1,3 +1,20 @@
+#imports
+    #resize_image()
+from cv2 import imread , resize , IMREAD_GRAYSCALE
+from os import remove , walk
+from os.path import splitext
+import zipfile
+from pathlib import PurePath
+
+    #reduce_image()
+from cv2 import resize , INTER_AREA
+
+    #process_color()
+from numpy import floor
+
+    #reduce_color_palette()
+from numpy import reshape
+
 
 # resize list of images to same sizes / dimensions
 def resize_image(directory_path,
@@ -17,14 +34,6 @@ def resize_image(directory_path,
     img_name_list -- in case there is a list of images names to use (default: None)
         
     '''
-
-
-    from cv2 import imread , resize , IMREAD_GRAYSCALE
-    from os import remove , walk
-    from os.path import splitext
-    import zipfile
-    from pathlib import PurePath
-    
     
     #List to append the resized images
     re_image_list = []
@@ -245,10 +254,6 @@ def reduce_img(image, height):
     height -- new height
     '''
     
-    
-    from cv2 import resize , INTER_AREA
-    
-    
     #Set dimensions ratio
     ratio = image.shape[0]/image.shape[1]
     #Calculate new width
@@ -272,10 +277,6 @@ def process_color(channel_value, bins):
     bins -- number of colours to reduce each layer (total colors = bins^3)
     '''
     
-    
-    from numpy import floor
-    
-    
     ######################################
     if channel_value >= 255: 
         processed_value = 255
@@ -297,10 +298,6 @@ def reduce_col_palette(image, bins, info=False):
     bins -- number of colours to reduce each layer (total colors = bins^3). Used in 'process_color' function
     info -- if True, prints a message with the number of color of the new image
     '''
-
-
-    from numpy import reshape
-    
     
     # Capture image dimensions
     img = image.flatten()
