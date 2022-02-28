@@ -6,10 +6,10 @@ from sklearn.preprocessing import StandardScaler, MinMaxScaler, PolynomialFeatur
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score, mean_absolute_error, \
     mean_squared_error, mean_absolute_percentage_error
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.datasets import load_boston, load_iris
 import pandas as pd
 import numpy as np
 ########################
-from sklearn.datasets import load_boston
 from sklearn.svm import SVC
 
 
@@ -80,7 +80,7 @@ def prepare_data(dataset, target_column, sampler_type=None, scaler_type='std', t
     return scaled_sets
 
 
-def model_scoring_classification(name, model, X_test, y_test):
+def model_scoring_classification(name, model, X_test, y_test, average="binary", multi_class="raise"):
     """
     Calculates model scoring for classification models
     :param str name: Column name
@@ -93,12 +93,12 @@ def model_scoring_classification(name, model, X_test, y_test):
     preds = model.predict(X_test)
 
     metrics = pd.DataFrame({name: [f'{accuracy_score(y_test, preds):.10f}',
-                                   f'{precision_score(y_test, preds):.10f}',
-                                   f'{recall_score(y_test, preds):.10f}',
-                                   f'{f1_score(y_test, preds):.10f}',
-                                   f'{roc_auc_score(y_test, preds):.10f}']},
+                                   f'{precision_score(y_test, preds, average=average):.10f}',
+                                   f'{recall_score(y_test, preds, average=average):.10f}',
+                                   f'{f1_score(y_test, preds, average=average):.10f}']},
+                           # f'{roc_auc_score(y_test, preds, multi_class=multi_class):.10f}']},
                            index=[['Accuracy (TP + TN/TT)', 'Precision (TP/TP + FP)', 'Recall (TP/TP + FN)',
-                                   'F1 (har_mean Ac, Re)', 'ROC AUC']])
+                                   'F1 (har_mean Ac, Re)']])
 
     return metrics
 
@@ -151,7 +151,7 @@ def random_forest_classif(X_train, X_test, y_train, y_test):
     return model_fit, metrics, grid
 
 
-def SVC1(X_train, y_train, X_test, y_test):
+def SVC1(X_train, X_test, y_train, y_test):
     """
     Función para implementar un algoritmo de clasificación tipo Support Vector Machine Classifier.
     El algoritmo se prueba con valores: C = np.arange(0.1, 0.9, 0.1); "gamma": scale, auto;
@@ -169,22 +169,22 @@ def SVC1(X_train, y_train, X_test, y_test):
     svc = SVC()
 
     svc_param = {
-        "svc__C": np.arange(0.1, 0.9, 0.1),
+        "C": np.arange(0.1, 0.9, 0.1),
         "gamma": ["scale", "auto"],
-        "coef0": [-10, -1, 0, 0.1, 0.5, 1, 10, 100],
-        "svc__kernel": ["linear", "poly", "rbf"]
+        "coef0": [-10., -1., 0., 0.1, 0.5, 1, 10, 100],
+        "kernel": ["linear", "poly", "rbf"],
     }
 
     grid = GridSearchCV(svc, svc_param, cv=10, scoring='accuracy', n_jobs=-1, verbose=1)
 
     model_fit = grid.fit(X_train, y_train)
 
-    metrics = model_scoring_classification('SVC', model_fit, X_test, y_test)
+    metrics = model_scoring_classification('SVC', model_fit, X_test, y_test, average="weighted", multi_class="ovo")
 
     return model_fit, metrics, grid
 
 
-def LogistRegress(X_train, y_train, X_test, y_test):
+def LogistRegress(X_train, X_test, y_train, y_test):
     """
     Función para implementar un algoritmo de clasificación tipo LogisticRegression.
     El algoritmo se prueba con valores: C = np.arange(0.1, 4, 0.5); classifier__penalty: l1, l2
@@ -201,15 +201,16 @@ def LogistRegress(X_train, y_train, X_test, y_test):
     log_reg = LogisticRegression()
 
     log_param = {
-        'classifier__penalty': ['l1', 'l2'],
-        'classifier__C': np.arange(0.1, 4, 0.5)
+        'penalty': ['l2'],
+        'C': np.arange(0.1, 4, 0.5),
+        'solver': ['liblinear', 'newton-cg', 'lbfgs']
     }
 
     grid = GridSearchCV(log_reg, log_param, cv=10, scoring='accuracy', n_jobs=-1, verbose=1)
 
     model_fit = grid.fit(X_train, y_train)
 
-    metrics = model_scoring_classification('LogisticRegression', model_fit, X_test, y_test)
+    metrics = model_scoring_classification('LogisticRegression', model_fit, X_test, y_test, average="weighted")
 
     return model_fit, metrics, grid
 
@@ -290,8 +291,6 @@ def poly_reg(X_train, X_test, y_train, y_test, regular_type=None):
 
     # Regularization if needed
 
-    sets = []
-
     if regular_type == 'ridge':
         ridgeR = Ridge(alpha=10)
         ridgeR.fit(X_train, y_train)
@@ -314,4 +313,4 @@ def poly_reg(X_train, X_test, y_train, y_test, regular_type=None):
 
         print("Regularization not necessary")
 
-    return model_fit, metrics, sets
+    return model_fit, metrics
