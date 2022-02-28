@@ -8,6 +8,9 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 from sklearn.ensemble import RandomForestClassifier
 import pandas as pd
 import numpy as np
+########################
+from sklearn.datasets import load_boston
+from sklearn.svm import SVC
 
 
 def divide(dataset, target_column):
@@ -109,7 +112,7 @@ def model_scoring_regression(name, model, X_test, y_test):
     :param y_test: y
     :return: metrics
     """
-    name = f'{name.upper()} ({set} data)'
+    name = f'{name.upper()} (test data)'
     preds = model.predict(X_test)
 
     metrics = pd.DataFrame({name: [f'{model.score(X_test, y_test):.10f}',
@@ -148,7 +151,7 @@ def random_forest_classif(X_train, X_test, y_train, y_test):
     return model_fit, metrics, grid
 
 
-def SVC(X_train, y_train, X_test, y_test):
+def SVC1(X_train, y_train, X_test, y_test):
     """
     Función para implementar un algoritmo de clasificación tipo Support Vector Machine Classifier.
     El algoritmo se prueba con valores: C = np.arange(0.1, 0.9, 0.1); "gamma": scale, auto;
@@ -260,13 +263,11 @@ def best_classif_model(dataset, target_column, sampler_type, scaler_type, test_s
     return results, metrics
 
 
-def poly_reg(X, y, X_train, y_train, X_test, y_test, regular_type=None):
+def poly_reg(X_train, X_test, y_train, y_test, regular_type=None):
     """
 
     Apply a polynomial regression model with 3 polynomial levels
 
-    :param X: to apply PolynomialFeatures to X dataset (before split in train, test)
-    :param y: to apply PolynomialFeatures to y dataset (before split in train, test)
     :param X_train
     :param y_train
     :param X_test
@@ -275,17 +276,17 @@ def poly_reg(X, y, X_train, y_train, X_test, y_test, regular_type=None):
     :return model_fit, metrics: trained model and metrics
     """
 
-    poly_feats = PolynomialFeatures(degree=3)
+    poly_feats = PolynomialFeatures(degree=2)
 
-    poly_feats.fit(X)
+    X_poly = poly_feats.fit_transform(X_train)
 
-    X_poly = poly_feats.transform(X)
+    model_fit = LinearRegression()
 
-    pol_reg = LinearRegression()
+    model_fit.fit(X_poly, y_train)
 
-    model_fit = pol_reg.fit(X_poly, y)
+    X_poly_test = poly_feats.transform(X_test)
 
-    metrics = model_scoring_regression('PolynomialRegression', model_fit, X_test, y_test)
+    metrics = model_scoring_regression('PolynomialRegression', model_fit, X_poly_test, y_test)
 
     # Regularization if needed
 
@@ -294,23 +295,20 @@ def poly_reg(X, y, X_train, y_train, X_test, y_test, regular_type=None):
     if regular_type == 'ridge':
         ridgeR = Ridge(alpha=10)
         ridgeR.fit(X_train, y_train)
-        y_pred = ridgeR.predict(X_test)
-        ridge_error = mean_squared_error(y_pred, y_test)
-        sets.append(ridge_error)
+        metrics = pd.concat([metrics,
+                             model_scoring_regression('POLREG-RIDGE', ridgeR, X_test, y_test)], axis=1)
 
     elif regular_type == 'lasso':
         lassoR = Lasso(alpha=1)
         lassoR.fit(X_train, y_train)
-        y_pred = lassoR.predict(X_test)
-        lassoR_error = mean_squared_error(y_pred, y_test)
-        sets.append(lassoR_error)
+        metrics = pd.concat([metrics,
+                             model_scoring_regression('POLREG-LASSO', lassoR, X_test, y_test)], axis=1)
 
     elif regular_type == 'elasticnet':
         elastic_net = ElasticNet(alpha=1, l1_ratio=0.5)
         elastic_net.fit(X_train, y_train)
-        y_pred = elastic_net.predict(X_test)
-        elastic_net_error = mean_squared_error(y_pred, y_test)
-        sets.append(elastic_net)
+        metrics = pd.concat([metrics,
+                             model_scoring_regression('POLREG-ELASTICNET', elastic_net, X_test, y_test)], axis=1)
 
     elif regular_type == 'None':
 
