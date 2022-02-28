@@ -175,12 +175,6 @@ def visualizeME_and_describe_barplot(dataframe, categ_var, numeric_var, palette=
 
 
 # FUNCION 4
-
-# Modules settings
-%matplotlib inline
-sns.set_theme(style='whitegrid')
-
-
 def visualizeME_c_matrix(y_true, 
                         y_pred, 
                         title='',
@@ -247,7 +241,7 @@ def visualizeME_c_matrix(y_true,
         
         metrics -- `pd.DataFrame`
     '''
-                         
+    sns.set_theme(style='whitegrid')                
     # Generate confusion matrix
     cfm = confusion_matrix(y_true, y_pred)
     
