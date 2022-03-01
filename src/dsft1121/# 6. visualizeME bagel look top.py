@@ -24,7 +24,7 @@ def visualizeME_bagel_look_top(dataframe, categ_var, top=0, cmap = 'tab10', circ
     
     # Generate graph
     plt.figure(figsize=(10,10))
-    plt.pie(data_valores.values, labels=data_valores.index, textprops={"fontsize":15}, startangle = 45, autopct='%1.2f%%', frame=False, colors= sns.color_palette(cmap))
+    plt.pie(data_valores.values, labels=data_valores.index, textprops={"fontsize":15}, startangle = 60, autopct='%1.2f%%', frame=False, colors= sns.color_palette(cmap))
     p=plt.gcf()
     if circle is True:
         my_circle=plt.Circle((0,0), 0.4, color="w")
@@ -36,5 +36,23 @@ def visualizeME_bagel_look_top(dataframe, categ_var, top=0, cmap = 'tab10', circ
     if save == True:
         path=os.path.join('visualizeME_Graphic_baggel_' + titulo.lower() + '.png')
         plt.savefig(path, format='png', dpi=300)
+    
+    # Generate table
+    values_bagel = pd.DataFrame(dataframe[categ_var].value_counts())
+    new_list = []
+    for i in list(dataframe[categ_var].value_counts()):
+        sumat = sum(list(dataframe[categ_var].value_counts()))
+        peso = i/sumat
+        new_list.append(peso)
+    porcentaj_nums = list(map(lambda x : x * 100, new_list))
+    porcentaj_round3 = list(map(lambda x : round(x,2), porcentaj_nums))
+    porcentaj = list(map(lambda x : str(x) + '%', porcentaj_round3))
+    values_bagel['Pesos(%)'] = porcentaj
 
-    return plt.show()
+    # Save table
+    if save == True:
+        name = 'visualizeME_table_bagel_' + titulo.lower() + '.csv'
+        values_bagel.to_csv(name, header=True)
+    
+    plt.show()
+    return display(values_bagel)
