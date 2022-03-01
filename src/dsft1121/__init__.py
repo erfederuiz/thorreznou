@@ -1,3 +1,3 @@
-from dsft1121.VIZ import *
-from dsft1121.ML import *
-from dsft1121.EDA import *
+from thorreznou.VIZ import *
+from thorreznou.ML import *
+from thorreznou.EDA import *
