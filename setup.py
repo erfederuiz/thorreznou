@@ -4,14 +4,14 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-  name = 'tbd',         
+  name = 'Thorreznou',         
   version = '0.1',    
   author = 'The Bridge Data Science Team 1121',                   
-  author_email = 'tbd@gmail.com',
-  description = '''tbd.''',   
+  author_email = 'Thorreznou@gmail.com',
+  description = '''Thorreznou.''',   
   long_description=long_description,
   long_description_content_type="text/markdown",
-  url = 'https://github.com/mabatalla/DSFT1121/tbd',   
+  url = 'https://github.com/mabatalla/DSFT1121',   
   classifiers=[
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
