@@ -580,7 +580,7 @@ def visualizeME_and_describe_Spidey(dataframe, save= True):
 
 
 # FUNCION 9
-def visualize_metrics(y_true,models,bin_multi_classifier,vis_pallete='tab10',save =False):
+def visualizeME_scores_models(y_true,models,bin_multi_classifier,vis_pallete='tab10',save = True):
     ''' 
     This is a function that allows you to quickly identify the best metrics from your Machine Learning models whether is binary or non binary target
     ### Parameters(4):
