@@ -305,77 +305,72 @@ def corr_target(X, y, n_columns=1):  # Los parámetros introducidos son "X", "y"
     return lista_final
 
 
-def knn(X_train, y_train, X_test, y_test):
+def knn (X_train, X_test, y_train, y_test):
+
+    """
+    Function to implement a classification algorithm such as KNeighborsClassifier.
+
+    :param X_train: X_train
+    :param y_train: y_train
+    :param X_test: X_test
+    :param y_test: y_test
+    :return: fitted model and metrics
+
+    In case the Dataframe does not fit the classifier, returns None.
+    """
+
     X_train = pd.DataFrame(X_train)
     X_test = pd.DataFrame(X_test)
+    y_train = pd.DataFrame(y_train)
+    y_test = pd.DataFrame(y_test)
 
-    if len(X_train.columns) < 2:  # Comprobamos que el Train no tenga menos de 2 columnas, para así usar el modelo
-        models = None
-        scores = []
-        return models, scores
+    try:
+        if len (X_train.columns) < 2:
+            models = None
+            scores = []
+            return models, scores
 
-    if len(X_train.columns) > 2:  # En caso de que el Train tenga más de 2 columnas, escoger las 2 con mayor correlación
-        corr = corr_target(X_train, y_train, 2)
-        colum1 = corr[1]
-        colum2 = corr[2]
+        if len (X_train.columns) > 2:
+            corr = corr_target (X_train, y_train, 2)
+            colum1 = corr[1]
+            colum2 = corr[2]
 
-        X_train = pd.concat([X_train[colum1], X_train[colum2]],
-                            axis=1)  # Aquí creamos un X_train con las mencionados 3 mejores columnas
-        X_test = pd.concat([X_test[colum1], X_test[colum2]], axis=1)  # Lo mismo, pero con el X_test
+            X_train = pd.concat([X_train[colum1], X_train[colum2]], axis=1)
+            X_test = pd.concat([X_test[colum1], X_test[colum2]], axis=1)
 
-    scores_train = []
-    scores_test = []
-    k_range = range(1, 20)
+        scores_train = []
+        scores_test = []
+        k_range = range(1,20)
 
-    for i in k_range:  # Comprobamos cual es la mejor "K" probando del 1 al 20
-        knn_f = KNeighborsClassifier(n_neighbors=i)
-        knn_f.fit(X_train, y_train)
-        scores_train.append(knn_f.score(X_train,
-                                        y_train))  # Aquí se obtiene los score de los diferentes k, primero con Train y después con Test
-        scores_test.append(knn_f.score(X_test, y_test))
+        for i in k_range:
 
-    scores_change = change_score(
-        scores_test)  # Tratamos los scores para que así, descartemos los superiores al 0.90
+            knn_f = KNeighborsClassifier(n_neighbors= i)
+            knn_f.fit(X_train, y_train)
 
-    k = scores_test.index(max(scores_change)) + 1  # Con esto se obtiene el mejor "K"
+            scores_train.append(knn_f.score(X_train, y_train))
+            scores_test.append(knn_f.score(X_test, y_test))
 
-    knn = KNeighborsClassifier(n_neighbors=k)  # Ahora ya creamos el modelo con la mejor "K"
-    model = knn.fit(X_train, y_train)
+        scores_change = change_score (scores_test)
 
-    scores = []
+        try:
+            k = scores_test.index(max(scores_change)) + 1
 
-    scores.append(scores_train[k])
-    scores.append(scores_test[k])
+        except:
+            k = scores_test.index(min(scores_test)) + 1
 
-    print("Accuracy train", scores[0])
-    print("Accuracy test", scores[1])
+        knn = KNeighborsClassifier(n_neighbors= k)
 
-    return model, scores  # Devuelve el modelo ajustado y la lista con el score del Train y del Test
-    # %%
-    dataset_movies = pd.read_csv('https://projects.danielvivas.com/librarytemp/movies.csv')
-    # dataset_movies = dataset_movies.loc[:, dataset_movies.dtypes != object][:1000]
-    dataset_movies.dropna(inplace=True)
+        model = knn.fit(X_train, y_train)
 
-    dataset_boston = load_boston()
-    dataset_boston = pd.concat(
-        [pd.DataFrame(dataset_boston['data']), pd.DataFrame(dataset_boston['target'], columns=['target'])], axis=1)
-    dataset_boston = pd.DataFrame(dataset_boston)
-    dataset_boston.dropna(inplace=True)
+        metrics  =  model_scoring_classification ('KNN' , model , X_test , y_test,  average="weighted")
 
-    dataset_iris = load_iris()
-    dataset_iris = pd.concat(
-        [pd.DataFrame(dataset_iris['data']), pd.DataFrame(dataset_iris['target'], columns=['target'])], axis=1)
-    dataset_iris = pd.DataFrame(dataset_iris)
-    dataset_iris.dropna(inplace=True)
+        return model, metrics
 
-    data = prepare_data(dataset_iris, 'target')
+    except ValueError:
 
-    # modelo = SVC1(data[0][0], data[0][1], data[0][2], data[0][3])
-    # modelo = LogistRegress(data[0][0], data[0][1], data[0][2], data[0][3])
-    # modelo = random_forest_classif(data[0][0], data[0][1], data[0][2], data[0][3])
-    modelo = knn(data[0][0], data[0][1], data[0][2], data[0][3])
+        print ("Dataframe does not fit classifier")
 
-    # modelo = poly_reg(data[0][0], data[0][1], data[0][2], data[0][3], regular_type='lasso')
+        return None
 
 
 def poly_reg(X_train, X_test, y_train, y_test, regular_type=None):
