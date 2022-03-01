@@ -22,7 +22,18 @@ setuptools.setup(
   install_requires=[
     'pandas',
     'numpy',    
-    'scikit-learn'   
+    'sklearn',
+    'seaborn',
+    'matplotlib',
+    'scipy',
+    'Ipython',
+    'wordcloud',
+    'PIL',
+    'imblearn',
+    'opencv-python',
+    'zipfile',
+    'pathlib'  
+      
   ],
   python_requires=">=3.6",
 )
