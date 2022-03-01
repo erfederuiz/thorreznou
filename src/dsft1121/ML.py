@@ -19,7 +19,6 @@ def divide(dataset, target_column):
     return X, y
 
 
-# TESTED: OK
 def prepare_data(dataset, target_column, sampler_type=None, scaler_type='std', test_size=0.2):
     """
         Divides dataset in X and y, samples if necessary, divides in train and test and scales
@@ -80,7 +79,6 @@ def prepare_data(dataset, target_column, sampler_type=None, scaler_type='std', t
     return scaled_sets
 
 
-# TESTED: OK
 def model_scoring_classification(name, model, X_test, y_test, average="binary", multi_class="raise"):
     """
     Calculates model scoring for classification models
@@ -106,7 +104,6 @@ def model_scoring_classification(name, model, X_test, y_test, average="binary", 
     return metrics
 
 
-# TESTED: OK
 def model_scoring_regression(name, model, X_test, y_test):
     """
     Calculates model scoring for regression models
@@ -127,7 +124,6 @@ def model_scoring_regression(name, model, X_test, y_test):
                            index=[['Score (R2 coef.)', 'MAE', 'MAPE', 'MSE', 'RMSE']])
 
     return metrics
-
 
 def random_forest_classif(X_train, X_test, y_train, y_test):
     """
@@ -155,7 +151,6 @@ def random_forest_classif(X_train, X_test, y_train, y_test):
     return model_fit, metrics, grid
 
 
-# TESTED: OK
 def SVC1(X_train, X_test, y_train, y_test):
     """
     Función para implementar un algoritmo de clasificación tipo Support Vector Machine Classifier.
@@ -189,7 +184,6 @@ def SVC1(X_train, X_test, y_train, y_test):
     return model_fit, metrics, grid
 
 
-# TESTED: OK
 def LogistRegress(X_train, X_test, y_train, y_test):
     """
     Función para implementar un algoritmo de clasificación tipo LogisticRegression.
@@ -233,8 +227,7 @@ def change_score(element):
 
 
 # FUNCIÓN PARA OBTENER LAS COLUMNAS CON MEJOR CORRELACIÓN CON EL TARGET
-def corr_target(X, y,
-                n_columns=1):  # Los parámetros introducidos son "X", "y" y el número de columnas (con mayor correlación con el target) deseadas
+def corr_target(X, y, n_columns=1):  # Los parámetros introducidos son "X", "y" y el número de columnas (con mayor correlación con el target) deseadas
     if n_columns <= 0:  # Para impedir que que se escoja un número menor a 1
         n_columns = 1
 
@@ -242,8 +235,7 @@ def corr_target(X, y,
 
     lista_final = []  # Esta es la lista que guardaría los nombres del targer y las columnas más correlacionadas
 
-    if n_columns > len(
-            df.columns):  # Comprobar que el número de columnas escogidas no sea mayor que el número disponible
+    if n_columns > len(df.columns):  # Comprobar que el número de columnas escogidas no sea mayor que el número disponible
         n_columns = len(df.columns)
 
     correlation_mat = df.corr()  # Obtener la correlación
@@ -313,7 +305,6 @@ def corr_target(X, y,
     return lista_final
 
 
-# FUNICÓN PARA KNN
 def knn(X_train, y_train, X_test, y_test):
     X_train = pd.DataFrame(X_train)
     X_test = pd.DataFrame(X_test)
@@ -387,7 +378,6 @@ def knn(X_train, y_train, X_test, y_test):
     # modelo = poly_reg(data[0][0], data[0][1], data[0][2], data[0][3], regular_type='lasso')
 
 
-# TESTED: OK
 def poly_reg(X_train, X_test, y_train, y_test, regular_type=None):
     """
 
@@ -440,7 +430,6 @@ def poly_reg(X_train, X_test, y_train, y_test, regular_type=None):
     return model_fit, metrics
 
 
-# TESTED: OK
 def lin_reg(X_train, X_test, y_train, y_test, regular_type=None):
     """
     Apply a lineal regression model with 3 polynomial levels
