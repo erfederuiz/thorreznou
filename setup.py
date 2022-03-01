@@ -28,7 +28,7 @@ setuptools.setup(
     'scipy',
     'Ipython',
     'wordcloud',
-    'PIL',
+    'pillow',
     'imblearn',
     'opencv-python',
     'zipfile',
