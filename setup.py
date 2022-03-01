@@ -31,9 +31,7 @@ setuptools.setup(
     'pillow',
     'imblearn',
     'opencv-python',
-    'zipfile',
     'pathlib'  
-      
   ],
   python_requires=">=3.6",
 )
