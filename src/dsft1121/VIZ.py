@@ -15,18 +15,18 @@ from PIL import Image
 
 
 # FUNCION 1
-def visualizeME_palettes_or_colors(selection = 'palette', quantity_colors= 8):
+def visualizeME_palettes_or_colors(selection = 'palettes', quantity_colors= 8):
     '''
-    Function that returns the possible color palettes of the Seaborn library
+    Function for consulting the colors and palettes available of the Seaborn library
     ### Parameters (2):
-        * selection: `str` by default gives 'palettes', but you can choose colors
+        * selection: `str` by default gives 'palettes', but you can choose 'colors'
         * quantity_colors: `int` by default it returns 8 colors per palette, you can change number of colors you will need. And if you want to see colors, it is not neccesary this parameter.
     ### Return (1):
         * plt.show(): available palettes/ colors with their respective names
     '''
     colors = pd.read_csv('data/seaborn_color_list.csv')
 
-    if selection == 'palette':
+    if selection == 'palettes':
         grid = np.vstack((np.linspace(0, 1, quantity_colors), np.linspace(0, 1, quantity_colors)))
         options_colors = colors['PALETTE_COLORS'].dropna().sort_values(key=lambda x: x.str.lower())
         col = 4                             
@@ -46,7 +46,7 @@ def visualizeME_palettes_or_colors(selection = 'palette', quantity_colors= 8):
     
         print('If you want any palette reversed, just add "_r" at the end of the palette name')
 
-    elif selection == 'color':
+    elif selection == 'colors':
         just_colors = sorted(colors['CSS4_COLORS'].dropna().sort_values(key=lambda x: x.str.lower()))
         col = 4                             
         pos = 1 
@@ -68,6 +68,7 @@ def visualizeME_palettes_or_colors(selection = 'palette', quantity_colors= 8):
 def visualizeME_and_describe_violinbox(dataframe, categ_var, numeric_var, palette= 'tab10', save= True):
     '''
     Function that allows to obtain a more complete graph by merging boxplot and violinplot together with a table of descriptive metrics
+    It is high recommendable! to use this type of graph for a categoric variable with 20 unique values maximum.
     ### Parameters (5):
         * dataframe: `dataframe`  origin table
         * categ_var: `str` categoric variable
@@ -527,19 +528,22 @@ def visualizeME_bagel_look_top(dataframe, categ_var, top=0, cmap = 'tab10', circ
 #FUNCION 7
 def visualizeME_and_describe_Spidey(dataframe, save= True):
     '''
-    This function  generate a polar chart with your numeric variables in order to compare their means. Important!! first scale your numeric variables.
+    ## IMPORTANT: This function its just for SCALED dataframe (just numeric variables).
+    ## If you don't have scaled your variables, please first do it!!!
+    This function  generate a polar chart with your numeric 
+    variables in order to compare their means.
     ### Parameters (2):
         * dataframe: `dataframe` origin table
         * save: `bool` by default is True in order to save your graph, but if you prefer don't save it, just choose 'False'
     '''
-    spidey = pd.DataFrame(dataframe.iloc[:,0:-1].mean(), columns=['Means'])
+    spidey = pd.DataFrame(dataframe.mean(), columns=['Means'])
 
-    categories=list(dataframe.iloc[:,0:-1].columns)
+    categories=list(dataframe.columns)
     categories+=categories[:1]
     num =len(categories)
 
     # variables means
-    value=list(dataframe.iloc[:,0:-1].mean())
+    value=list(dataframe.mean())
     value+=value[:1]
 
     loc_label = np.linspace(start=0, stop=2*np.pi, num= num)
@@ -575,12 +579,8 @@ def visualizeME_and_describe_Spidey(dataframe, save= True):
 
 
 
-# FUNCION 8 -> La deja subida Natalia
-
-
-
-# FUNCION 9
-def visualizeME_scores_models(y_true,models,bin_multi_classifier,vis_pallete='tab10',save = True):
+# FUNCION 8
+def visualizeME_scores_models(y_true,models,bin_multi_classifier= 'bin',pallete='tab10',save = True):
     ''' 
     This is a function that allows you to quickly identify the best metrics from your Machine Learning models whether is binary or non binary target
     ### Parameters(4):
@@ -590,10 +590,10 @@ def visualizeME_scores_models(y_true,models,bin_multi_classifier,vis_pallete='ta
             here you should put a diccionary that contains for keys, the model names (as a str) and for values their predictions to compare with true labels.
              This will help to join all the metrics in one data frame
              EXAMPLE: {'Linear Regression':preds_multi,'KNN Classifier':preds_multi2}
-        * vis_pallete:
+        * pallete: `str`
             Seaborn color pallete we have selected before
-        * bin_multi_classifier:
-            True if it is a binomial model (0,1) and  False if it is multicategory
+        * bin_multi_classifier:`bool`
+            True if it is a binomial model (0,1) and  False for a multicategory classification
         * save=False -- `bool` 
             Saves plot and metrics (if metrics=True) to disk. If title='' default is 'classifier'.
     '''
@@ -633,7 +633,7 @@ def visualizeME_scores_models(y_true,models,bin_multi_classifier,vis_pallete='ta
                 # Setting a bar plot to see the best Accuracy:
                 num=len(df.columns)
                 plt.figure(figsize=(num*1.5,5))
-                graf1= sns.barplot(x=df.columns,y=df.iloc[y],palette=vis_pallete)
+                graf1= sns.barplot(x=df.columns,y=df.iloc[y],palette=pallete)
                 graf1.set_xlabel('Metrics from Models',fontsize = 12)
                 graf1.set_title('Accuracy',fontsize=15,color='blue')
                 for i in graf1.patches:
@@ -658,7 +658,7 @@ def visualizeME_scores_models(y_true,models,bin_multi_classifier,vis_pallete='ta
                 # Setting a bar plot to see the best Precision:
                 num=len(df.columns)
                 plt.figure(figsize=(num*1.5,5))
-                graf2= sns.barplot(x=df.columns,y=df.iloc[y],palette=vis_pallete)
+                graf2= sns.barplot(x=df.columns,y=df.iloc[y],palette=pallete)
                 graf2.set_xlabel('Metrics from Models',fontsize = 12)
                 graf2.set_title('Precision',fontsize=15,color='blue')
                 for i in graf2.patches:
@@ -685,7 +685,7 @@ def visualizeME_scores_models(y_true,models,bin_multi_classifier,vis_pallete='ta
                 # Setting a bar plot to see the best Recall:
                 num=len(df.columns)
                 plt.figure(figsize=(num*1.5,5))
-                graf3= sns.barplot(x=df.columns,y=df.iloc[y],palette=vis_pallete)
+                graf3= sns.barplot(x=df.columns,y=df.iloc[y],palette=pallete)
                 graf3.set_xlabel('Metrics from Models',fontsize = 12)
                 graf3.set_title('Recall',fontsize=15,color='blue')
                 for i in graf3.patches:
@@ -711,7 +711,7 @@ def visualizeME_scores_models(y_true,models,bin_multi_classifier,vis_pallete='ta
                 # Setting a bar plot to see the best F1 Score:
                 num=len(df.columns)
                 plt.figure(figsize=(num*1.5,5))
-                graf4= sns.barplot(x=df.columns,y=df.iloc[y],palette=vis_pallete)
+                graf4= sns.barplot(x=df.columns,y=df.iloc[y],palette=pallete)
                 graf4.set_xlabel('Metrics from Models',fontsize = 12)
                 graf4.set_title('F1 Scores',fontsize=15,color='blue')
                 for i in graf4.patches:
@@ -736,7 +736,7 @@ def visualizeME_scores_models(y_true,models,bin_multi_classifier,vis_pallete='ta
                 # Setting a bar plot to see the best ROC AUC Score:
                 num=len(df.columns)
                 plt.figure(figsize=(num*1.5,5))
-                graf5= sns.barplot(x=df.columns,y=df.iloc[y],palette= vis_pallete)
+                graf5= sns.barplot(x=df.columns,y=df.iloc[y],palette= pallete)
                 graf5.set_xlabel('Metrics from Models',fontsize = 12)
                 graf5.set_title('ROC / AUC',fontsize=15,color='blue')
                 for i in graf5.patches:
@@ -756,7 +756,7 @@ def visualizeME_scores_models(y_true,models,bin_multi_classifier,vis_pallete='ta
     # bin_multi_classifier is False ->>>>> Multicategorical:
     else:
         for i,j in enumerate(models):
-            report = classification_report(y_multi,values_modelo[i])
+            report = classification_report(y_true,values_modelo[i])
             report = [line.split(' ') for line in report.splitlines()]
 
             header = [x.upper()+' : '+keys_modelo[i] for x in report[0] if x!='']
@@ -799,7 +799,7 @@ def visualizeME_scores_models(y_true,models,bin_multi_classifier,vis_pallete='ta
         # Setting a BarPlot to show the Best model Accuracy:
         num=len(acc.index)
         plt.figure(figsize=(num*1.9,4))
-        graf1= sns.barplot(data=acc,palette=vis_pallete)
+        graf1= sns.barplot(data=acc,palette=pallete)
         graf1.set_xlabel('ML Models - Results',fontsize = 12)
         graf1.set_title('Accuracy',fontsize=15,color='blue')
         for i in graf1.patches:
