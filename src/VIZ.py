@@ -24,7 +24,7 @@ def visualizeME_palettes_or_colors(selection = 'palettes', quantity_colors= 8):
     ### Return (1):
         * plt.show(): available palettes/ colors with their respective names
     '''
-    colors = pd.read_csv('data/seaborn_color_list.csv')
+    colors = pd.read_csv('data/viz/seaborn_color_list.csv')
 
     if selection == 'palettes':
         grid = np.vstack((np.linspace(0, 1, quantity_colors), np.linspace(0, 1, quantity_colors)))
@@ -62,6 +62,7 @@ def visualizeME_palettes_or_colors(selection = 'palettes', quantity_colors= 8):
 
     plt.tight_layout()
     return plt.show()
+
 
 
 # FUNCION 2
@@ -123,6 +124,7 @@ def visualizeME_and_describe_violinbox(dataframe, categ_var, numeric_var, palett
     display(table)
 
 
+
 # FUNCION 3
 def visualizeME_and_describe_barplot(dataframe, categ_var, numeric_var, palette='tab10', save = True):
     '''
@@ -175,7 +177,180 @@ def visualizeME_and_describe_barplot(dataframe, categ_var, numeric_var, palette=
     display(table)
 
 
+
 # FUNCION 4
+def visualizeME_FigureWords(dataframe, categ_var, shape= 'seahorse', cmap= 'tab10', contour= 'steelblue', back_color = 'white', height= 18, width = 20, save= True):
+    '''
+    Function that returns graph of words with different shapes, with the possibility to choose between 'dino', 'heart', 'star', 'seahorse' and 'hashtag'. I hope you like it!
+    ### Parameters (9):
+        * dataframe: `dataframe` origin table
+        * categ_var: `str` categoric variable
+        * shape: `str` by default is 'seahorse' shape, but you can choose from this list: 'seahorse', 'dino', 'heart', 'star' and 'hashtag'.
+        * cmap: `str` by default is 'tab10', but you can choose your palette of Seaborn. If you want to know which palettes are available you can call visualizeME_colors_palettes() function
+        * contour: `str` by default is 'steelblue', but you can choose your favourite color
+        * back_color: `str` by default is 'white', but you can choose your background color
+        * height: `int` by default is 18, but you can select your preference on height of the figure
+        * width:`int` by default is 20, but you can select your preference on width of the figure
+        * save: `bool` by default is True in order to save your graph, but if you prefer don't save it, just choose 'False'
+    ### Return (1):
+        * plt.show(): graph with your figure(by default will be seahorse)
+    '''
+    # Shape
+    while shape not in ['dino', 'heart', 'star', 'seahorse', 'hashtag']:    
+        shape = input('Try again, what shape do you want for your figure words graph?\n*Dino\n*Heart\n*Star\n*Seahorse: ').lower()
+    if shape == 'seahorse':
+        figure = 'data/viz/seahorse_visualizeME.jpg'
+    elif shape == 'dino':
+        figure = 'data/viz/dino_steg_visualizeME.jpg'
+    elif shape == 'heart': 
+        figure = 'data/viz/corazon_visualizeME.png'
+    elif shape == 'star':
+        figure = 'data/viz/estrella-silueta_visualizeME.png'  
+    elif shape == 'hashtag':
+        figure = 'data/viz/hashtag-silueta_visualizeME.png'
+    
+    # Words
+    words = ' '.join(map(str, dataframe[categ_var]))
+    custom_mask = np.array(Image.open(figure))
+    wordcloud = WordCloud(background_color=back_color,
+                      width=2500,
+                      height=2000,
+                      max_words=500, 
+                      contour_width=0.1, 
+                      contour_color= contour, 
+                      colormap= cmap,
+                      scale =5,mask=custom_mask).generate(words)
+    
+    plt.figure(1, figsize = (height, width))
+    plt.imshow(wordcloud, interpolation='bilinear')
+    plt.axis('off')
+
+    # Save Graph
+    if save == True:
+        figure = figure.split('/')[1]
+        figure = figure.split('.')[0]
+        name = 'visualizeME_Graphic_' + figure + '.png'
+        plt.savefig(name)
+    
+    return plt.show()
+
+
+
+# FUNCION 5
+def visualizeME_bagel_look_top(dataframe, categ_var, top=0, cmap = 'tab10', circle=True, save=True):
+    '''
+    Function to generate a bagel graphic where you can select the top categories you want to see, or everyone by default
+    ### Parameters (6):
+        * dataframe: `dataframe` origin table
+        * categ_var: `str` categoric variable
+        * top: `int` by default is 0, but you can choose look the top n categories and their weights.
+        * cmap: `str` by default is 'tab10', but you can choose your palette of Seaborn. If you want to know which palettes are available you can call visualizeME_colors_palettes() function
+        * circle: `bool` by default is True, in orders to seems like a bagel, but you can choose select a pie
+        * save: `bool` by default is True in order to save your graph, but if you prefer don't save it, just choose 'False'
+    '''
+    data_valores= dataframe[categ_var].value_counts()
+    # Filter by top categories
+    if top != 0:
+        data_valores_top= data_valores[(top):]
+        p=0
+        for i in data_valores_top:
+            p=i+p
+        data_valores_top=pd.Series([p],index=[f"Resto [{len(data_valores_top.index)}]"])
+        data_valores_max= data_valores[:(top)]
+        data_valores=pd.concat([data_valores_max, data_valores_top])
+    
+    # Generate graph
+    plt.figure(figsize=(10,10))
+    plt.pie(data_valores.values, labels=data_valores.index, textprops={"fontsize":15}, startangle = 60, autopct='%1.2f%%', frame=False, colors= sns.color_palette(cmap))
+    p=plt.gcf()
+    if circle is True:
+        my_circle=plt.Circle((0,0), 0.4, color="w")
+        p.gca().add_artist(my_circle)
+    titulo= 'DISTRIBUCIÓN DE ' + categ_var.upper()
+    plt.title(titulo, fontsize= 20)
+
+    # Save graph
+    if save == True:
+        path=os.path.join('visualizeME_Graphic_baggel_' + titulo.lower() + '.png')
+        plt.savefig(path, format='png', dpi=300)
+    
+    # Generate table
+    values_bagel = pd.DataFrame(dataframe[categ_var].value_counts())
+    new_list = []
+    for i in list(dataframe[categ_var].value_counts()):
+        sumat = sum(list(dataframe[categ_var].value_counts()))
+        peso = i/sumat
+        new_list.append(peso)
+    porcentaj_nums = list(map(lambda x : x * 100, new_list))
+    porcentaj_round3 = list(map(lambda x : round(x,2), porcentaj_nums))
+    porcentaj = list(map(lambda x : str(x) + '%', porcentaj_round3))
+    values_bagel['Pesos(%)'] = porcentaj
+
+    # Save table
+    if save == True:
+        name = 'visualizeME_table_bagel_' + titulo.lower() + '.csv'
+        values_bagel.to_csv(name, header=True)
+    
+    plt.show()
+    return display(values_bagel)
+
+
+
+#FUNCION 6
+def visualizeME_and_describe_Spidey(dataframe, save= True):
+    '''
+    ## IMPORTANT: This function its just for SCALED dataframe (just numeric variables).
+    ## If you don't have scaled your variables, please first do it!!!
+    This function  generate a polar chart with your numeric 
+    variables in order to compare their means.
+    ### Parameters (2):
+        * dataframe: `dataframe` origin table
+        * save: `bool` by default is True in order to save your graph, but if you prefer don't save it, just choose 'False'
+    '''
+    spidey = pd.DataFrame(dataframe.mean(), columns=['Means'])
+
+    categories=list(dataframe.columns)
+    categories+=categories[:1]
+    num =len(categories)
+
+    # variables means
+    value=list(dataframe.mean())
+    value+=value[:1]
+
+    loc_label = np.linspace(start=0, stop=2*np.pi, num= num)
+
+    plt.figure(figsize=(10,10))
+    ax = plt.subplot(polar=True)
+    plt.plot(loc_label, value)
+    plt.fill(loc_label, value, 'blue', alpha=0.1)
+    # use thetagrids to place labels at the specified angles using degrees
+    lines, labels = plt.thetagrids(np.degrees(loc_label), labels=categories)
+
+    # Comienza radar chart arriba y hacia la derecha las variables
+    ax.set_theta_offset(np.pi / 2)
+    ax.set_theta_direction(-1)
+    ax.set_rlabel_position(0)
+
+    titulo= 'SPIDEY CHART TO COMPARE MEANS OF SCALED NUMERIC VARIABLES'
+    plt.title(titulo, y=1.1, fontdict={'fontsize': 18})
+    plt.legend(labels=['Mean'],loc=(1, 1))
+
+    # Save graph
+    if save == True:
+        path=os.path.join('visualizeME_Graphic_' + titulo.lower() + '.png')
+        plt.savefig(path, format='png', dpi=300)
+
+    # Save Table
+    if save == True:
+        name = 'visualizeME_table_' + titulo.lower() + '.csv'
+        spidey.to_csv(name, header=True)
+
+    plt.show()
+    return display(spidey)
+
+
+
+#FUNCION 7
 def visualizeME_c_matrix(y_true, 
                         y_pred, 
                         title='',
@@ -407,175 +582,6 @@ def visualizeME_c_matrix(y_true,
         metrics_df.to_csv(name, header=True)
 
     return cfm, metrics
-
-
-# FUNCION 5
-def visualizeME_FigureWords(dataframe, categ_var, shape= 'seahorse', cmap= 'tab10', contour= 'steelblue', back_color = 'white', height= 18, width = 20, save= True):
-    '''
-    Function that returns graph of words with different shapes, with the possibility to choose between 'dino', 'heart', 'star', 'seahorse' and 'hashtag'. I hope you like it!
-    ### Parameters (9):
-        * dataframe: `dataframe` origin table
-        * categ_var: `str` categoric variable
-        * shape: `str` by default is 'seahorse' shape, but you can choose from this list: 'seahorse', 'dino', 'heart', 'star' and 'hashtag'.
-        * cmap: `str` by default is 'tab10', but you can choose your palette of Seaborn. If you want to know which palettes are available you can call visualizeME_colors_palettes() function
-        * contour: `str` by default is 'steelblue', but you can choose your favourite color
-        * back_color: `str` by default is 'white', but you can choose your background color
-        * height: `int` by default is 18, but you can select your preference on height of the figure
-        * width:`int` by default is 20, but you can select your preference on width of the figure
-        * save: `bool` by default is True in order to save your graph, but if you prefer don't save it, just choose 'False'
-    ### Return (1):
-        * plt.show(): graph with your figure(by default will be seahorse)
-    '''
-    # Shape
-    while shape not in ['dino', 'heart', 'star', 'seahorse', 'hashtag']:    
-        shape = input('Try again, what shape do you want for your figure words graph?\n*Dino\n*Heart\n*Star\n*Seahorse: ').lower()
-    if shape == 'seahorse':
-        figure = 'data/seahorse_visualizeME.jpg'
-    elif shape == 'dino':
-        figure = 'data/dino_steg_visualizeME.jpg'
-    elif shape == 'heart': 
-        figure = 'data/corazon_visualizeME.png'
-    elif shape == 'star':
-        figure = 'data/estrella-silueta_visualizeME.png'  
-    elif shape == 'hashtag':
-        figure = 'data/hashtag-silueta_visualizeME.png'
-    
-    # Words
-    words = ' '.join(map(str, dataframe[categ_var]))
-    custom_mask = np.array(Image.open(figure))
-    wordcloud = WordCloud(background_color=back_color,
-                      width=2500,
-                      height=2000,
-                      max_words=500, 
-                      contour_width=0.1, 
-                      contour_color= contour, 
-                      colormap= cmap,
-                      scale =5,mask=custom_mask).generate(words)
-    
-    plt.figure(1, figsize = (height, width))
-    plt.imshow(wordcloud, interpolation='bilinear')
-    plt.axis('off')
-
-    # Save Graph
-    if save == True:
-        figure = figure.split('/')[1]
-        figure = figure.split('.')[0]
-        name = 'visualizeME_Graphic_' + figure + '.png'
-        plt.savefig(name)
-    
-    return plt.show()
-
-
-# FUNCION 6
-def visualizeME_bagel_look_top(dataframe, categ_var, top=0, cmap = 'tab10', circle=True, save=True):
-    '''
-    Function to generate a bagel graphic where you can select the top categories you want to see, or everyone by default
-    ### Parameters (6):
-        * dataframe: `dataframe` origin table
-        * categ_var: `str` categoric variable
-        * top: `int` by default is 0, but you can choose look the top n categories and their weights.
-        * cmap: `str` by default is 'tab10', but you can choose your palette of Seaborn. If you want to know which palettes are available you can call visualizeME_colors_palettes() function
-        * circle: `bool` by default is True, in orders to seems like a bagel, but you can choose select a pie
-        * save: `bool` by default is True in order to save your graph, but if you prefer don't save it, just choose 'False'
-    '''
-    data_valores= dataframe[categ_var].value_counts()
-    # Filter by top categories
-    if top != 0:
-        data_valores_top= data_valores[(top):]
-        p=0
-        for i in data_valores_top:
-            p=i+p
-        data_valores_top=pd.Series([p],index=[f"Resto [{len(data_valores_top.index)}]"])
-        data_valores_max= data_valores[:(top)]
-        data_valores=pd.concat([data_valores_max, data_valores_top])
-    
-    # Generate graph
-    plt.figure(figsize=(10,10))
-    plt.pie(data_valores.values, labels=data_valores.index, textprops={"fontsize":15}, startangle = 60, autopct='%1.2f%%', frame=False, colors= sns.color_palette(cmap))
-    p=plt.gcf()
-    if circle is True:
-        my_circle=plt.Circle((0,0), 0.4, color="w")
-        p.gca().add_artist(my_circle)
-    titulo= 'DISTRIBUCIÓN DE ' + categ_var.upper()
-    plt.title(titulo, fontsize= 20)
-
-    # Save graph
-    if save == True:
-        path=os.path.join('visualizeME_Graphic_baggel_' + titulo.lower() + '.png')
-        plt.savefig(path, format='png', dpi=300)
-    
-    # Generate table
-    values_bagel = pd.DataFrame(dataframe[categ_var].value_counts())
-    new_list = []
-    for i in list(dataframe[categ_var].value_counts()):
-        sumat = sum(list(dataframe[categ_var].value_counts()))
-        peso = i/sumat
-        new_list.append(peso)
-    porcentaj_nums = list(map(lambda x : x * 100, new_list))
-    porcentaj_round3 = list(map(lambda x : round(x,2), porcentaj_nums))
-    porcentaj = list(map(lambda x : str(x) + '%', porcentaj_round3))
-    values_bagel['Pesos(%)'] = porcentaj
-
-    # Save table
-    if save == True:
-        name = 'visualizeME_table_bagel_' + titulo.lower() + '.csv'
-        values_bagel.to_csv(name, header=True)
-    
-    plt.show()
-    return display(values_bagel)
-
-
-#FUNCION 7
-def visualizeME_and_describe_Spidey(dataframe, save= True):
-    '''
-    ## IMPORTANT: This function its just for SCALED dataframe (just numeric variables).
-    ## If you don't have scaled your variables, please first do it!!!
-    This function  generate a polar chart with your numeric 
-    variables in order to compare their means.
-    ### Parameters (2):
-        * dataframe: `dataframe` origin table
-        * save: `bool` by default is True in order to save your graph, but if you prefer don't save it, just choose 'False'
-    '''
-    spidey = pd.DataFrame(dataframe.mean(), columns=['Means'])
-
-    categories=list(dataframe.columns)
-    categories+=categories[:1]
-    num =len(categories)
-
-    # variables means
-    value=list(dataframe.mean())
-    value+=value[:1]
-
-    loc_label = np.linspace(start=0, stop=2*np.pi, num= num)
-
-    plt.figure(figsize=(10,10))
-    ax = plt.subplot(polar=True)
-    plt.plot(loc_label, value)
-    plt.fill(loc_label, value, 'blue', alpha=0.1)
-    # use thetagrids to place labels at the specified angles using degrees
-    lines, labels = plt.thetagrids(np.degrees(loc_label), labels=categories)
-
-    # Comienza radar chart arriba y hacia la derecha las variables
-    ax.set_theta_offset(np.pi / 2)
-    ax.set_theta_direction(-1)
-    ax.set_rlabel_position(0)
-
-    titulo= 'SPIDEY CHART TO COMPARE MEANS OF SCALED NUMERIC VARIABLES'
-    plt.title(titulo, y=1.1, fontdict={'fontsize': 18})
-    plt.legend(labels=['Mean'],loc=(1, 1))
-
-    # Save graph
-    if save == True:
-        path=os.path.join('visualizeME_Graphic_' + titulo.lower() + '.png')
-        plt.savefig(path, format='png', dpi=300)
-
-    # Save Table
-    if save == True:
-        name = 'visualizeME_table_' + titulo.lower() + '.csv'
-        spidey.to_csv(name, header=True)
-
-    plt.show()
-    return display(spidey)
 
 
 
