@@ -39,6 +39,10 @@ def resize_image(directory_path,
     
     #List to append the resized images
     re_image_list = []
+    admited_formats_list = ['.bmp' , '.dib' , '.jpeg' , '.jpg' , '.jpe' , '.jp2',
+                            '.png' , '.webp' , '.pbm' , '.pgm' , '.ppm' , '.pxm',
+                            '.pnm' , '.sr' , '.ras' , '.tiff' , '.tif' , '.exr' ,
+                            '.hdr' , '.pic']
     
     #If images in zip_file, extract and delete original zip
     if zip_file:
@@ -65,7 +69,7 @@ def resize_image(directory_path,
                 for name in files: 
                     file_ext = splitext(name)[1]
                     
-                    if file_ext.lower() == '.jpg':
+                    if file_ext.lower() in admited_formats_list:
                         img_path_list.append(PurePath(path, name))
                     else:
                         continue  
@@ -78,7 +82,7 @@ def resize_image(directory_path,
                     if name in img_name_list:
                         file_ext = splitext(name)[1]
                         
-                        if file_ext.lower() == '.jpg':
+                        if file_ext.lower() in admited_formats_list:
                             img_path_list.append(PurePath(path, name))
                         else:
                             continue
@@ -107,7 +111,7 @@ def resize_image(directory_path,
                 for name in files: 
                     file_ext = splitext(name)[1]
                     
-                    if file_ext.lower() == '.jpg':
+                    if file_ext.lower() in admited_formats_list:
                         img_path_list.append(PurePath(path, name))
                     else:
                         continue  
@@ -120,7 +124,7 @@ def resize_image(directory_path,
                     if name in img_name_list:
                         file_ext = splitext(name)[1]
                         
-                        if file_ext.lower() == '.jpg':
+                        if file_ext.lower() in admited_formats_list:
                             img_path_list.append(PurePath(path, name))
                         else:
                             continue
@@ -319,22 +323,23 @@ def reduce_col_palette(image, bins, info=False):
             
     return img
 
+
+# calculate math expectation of a set of features
 def math_expect(data, column_name_groups= None, column_name_success= None, n_top= 100):
     '''
     Function that calculates the mathematical expectation of a random variable ('column_name_groups').
-    Definition: Mathematical expectation, also known as the expected value, is the the sum or integral of all possible values of a random variable, 
-    or any given function of it, multiplied by the respective probabilities of the values of the variable.
+    Definition: Mathematical expectation, also known as the expected value, is the the sum or integral of all possible
+    values of a random variable, or any given function of it, multiplied by the respective probabilities of the values 
+    of the variable. Return the DataFrame used as input containing a new column named 'math_expectation' 
+    with the resulting values.
     
     Keyword arguments
-        - data (Pandas DataFrame type)-- is the given dataframe
-
-        - column_name_groups (string)-- name of column with the groups (random variable) to calculate the math expect
-
-        - column_name_success (string)-- name of column that sets the success measurement. ie: daily income or scoring from movies reviews
-        
-        - n_top (integer)-- default 100, number of occurrencies within the top shortlist. ie: top 100, top 1000 or top 10
-
-    Return: the DataFrame used as input containing a new column named 'math_expectation' with the resulting values
+    
+    data (Pandas DataFrame type) -- is the given dataframe
+    column_name_groups (string) -- name of column with the groups (random variable) to calculate the math expect
+    column_name_success (string) -- name of column that sets the success measurement. ie: daily income or scoring 
+    from movies reviews    
+    n_top (integer) -- default 100, number of occurrencies within the top shortlist. ie: top 100, top 1000 or top 10
     '''
     len_data = len(data)
 
@@ -380,14 +385,15 @@ def math_expect(data, column_name_groups= None, column_name_success= None, n_top
 
     return data
 
+
+# dataframe overview info
 def overview(df):
     '''
-    Function that summarizes data in a new dataframe from an originally given dataframe.
+    Function that summarizes data in a new dataframe from an originally given dataframe. It returns a new DataFrame
+    with valuable information from the original DataFrame you are working on.
   
     Keyword arguments
-        - data (Pandas DataFrame type)-- is the given dataframe
-
-    Return: a new DataFrame with valuable information from the original DataFrame you are working on
+    data (Pandas DataFrame type) -- the given dataframe
     '''
     #COLUMN NAMES
     cols = pd.DataFrame(df.columns.values,columns=['column names'])
@@ -419,35 +425,35 @@ def overview(df):
     concatenate.set_index('column names', drop=True, inplace=True)
 
     #WE ADD THE DESCRIBE() FUNCTION RESULTS AND CONCATENATE THEM TO THE PREVIOUS DATAFRAME
-    df_describe = pd.DataFrame(df.describe(), columns=df.columns)
+    df_describe = pd.DataFrame(df.describe(include= 'all'), columns=df.columns)
     df_concat = pd.concat([concatenate.T, df_describe])
 
     return df_concat
 
+
+# removes outliers from a feature and related entries
 def outlier_removal(data, column_name= None, p_max=None, p_min=None):
     '''
     Function that removes outliers from a given dataframe, specifying the column.
     min and max percentiles are passed as parameters to define the line between outliers and non-outliers.
-
+    Returns a new DataFrame without the data below the p_min and above the p_max.
+    
     Keyword arguments
-        - data (Pandas DataFrame type)-- is the given dataframe
-
-        - column_name (string)-- the chosen column to detect and remove outliers from
-
-        - p_max (integer)-- above this percentile we start removing outliers
-
-        - p_min (integer)-- below this percentile we start removing outliers
-
-    Return: a new DataFrame without the data below the p_min and above the p_max
+    data (Pandas DataFrame type) -- is the given dataframe
+    column_name (string) -- the chosen column to detect and remove outliers from
+    p_max (integer) -- above this percentile we start removing outliers
+    p_min (integer) -- below this percentile we start removing outliers
     '''
     q_max = p_max / 100
     q_min = p_min / 100
     q_max_column = data[column_name].quantile(q_max)
     q_min_column = data[column_name].quantile(q_min)
 
-    data = data[(data[column_name] >= q_min_column) & (data[column_name] < q_max_column)]
+    data = data[(data[column_name] > q_min_column) & (data[column_name] <= q_max_column)]
     return data 
 
+
+# transform columns to separated data values
 def datetime_into_columns(df, column, weekday = False, hour_minutes = False, from_type = 'object'):
     """ 
     The function converts a column with a date from either int64 or object type
@@ -455,18 +461,12 @@ def datetime_into_columns(df, column, weekday = False, hour_minutes = False, fro
     user can choose to add weekday - hour - minutes columns
 
     Keyword arguments
-        - df (Pandas DataFrame type)-- is the given dataframe
-
-        - column (string)-- the chosen column to create new columns from
-
-        - weekday (boolean)-- True if user wants new column with weekday value
-                                by default False
-
-        - hour_minutes (boolean)-- True if user wants two new columns with hour and minutes values
-                                    by default False
-
-        - from_type (string)-- 'object' by default if original column type is object and
-                                'int64' if original column type is int64
+    df (Pandas DataFrame type)-- is the given dataframe
+    column (string) -- the chosen column to create new columns from
+    weekday (boolean) -- True if user wants new column with weekday value (default False)
+    hour_minutes (boolean) -- True if user wants two new columns with hour and minutes values (default False)
+    from_type (string) -- 'object' by default if original column type is object and
+                        'int64' if original column type is int64
 
     return: the resulting dataframe with the new colum
     """
@@ -494,38 +494,45 @@ def datetime_into_columns(df, column, weekday = False, hour_minutes = False, fro
     
     return df
 
+
+# treatment of missing data (NaNs) by column
 def missing_data(df, columns = None, method = 'delete'):
     """
-    The function allows user to decide whether they want to delete,
-    convert to zeros, or replace by the mean / mode / median all missing 
-    values in a specific list of columns of the given df.
+    The function allows user to decide whether they want to delete, convert to zeros, or replace by the 
+    mean / mode / median all missing values in a specific list of columns of the given df. Returns the 
+    resulting dataframe.
 
     Keyword arguments
-        - df (Pandas DataFrame type)-- is the given dataframe
-
-        - columns (list)-- the chosen column/s with missing values
-    
-        - method (string)--    'delete' drops the missing values (by default)
-                                'zero' fills missing values with a zero
-                                'mean' fills missing values with the mean
-                                'mode' fills missing values with the mode
-                                'median' fills missing values with the median
-
-    return-- the resulting dataframe
+    df (Pandas DataFrame type) -- is the given dataframe
+    columns (list) -- the chosen column/s with missing values
+    method (string) -- how to treat the NaN values
+        - 'delete' drops the missing values (by default)
+        - 'zero' fills missing values with a zero
+        - 'mean' fills missing values with the mean
+        - 'mode' fills missing values with the mode
+        - 'median' fills missing values with the median
     """
  
     if method == 'delete':
         df.dropna(subset=columns, inplace= True)    
     elif method == 'zero':
+        
         for column in columns:
             df[column] = df[column].fillna(0)
+            
     elif method == 'mean':
+        
         for column in columns:
             df[column] = df[column].fillna(df[column].mean())
+            
     elif method == 'mode':
+        
         for column in columns:
             df[column] = df[column].fillna(df[column].mode()[0])
+            
     elif method == 'median':
+        
         for column in columns:
             df[column] = df[column].fillna(df[column].median())
+            
     return df
