@@ -5,13 +5,13 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
   name = 'Thorreznou',         
-  version = '0.1.3',    
+  version = '0.1.4',    
   author = 'The Bridge Data Science Team 1121',                   
   author_email = 'Thorreznou@gmail.com',
   description = '''Thorreznou.''',   
   long_description=long_description,
   long_description_content_type="text/markdown",
-  url = 'https://github.com/mabatalla/DSFT1121',   
+  url = 'https://github.com/erfederuiz/thorreznou',   
   classifiers=[
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
