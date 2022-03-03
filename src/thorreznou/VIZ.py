@@ -15,18 +15,18 @@ from PIL import Image
 
 
 # FUNCION 1
-def visualizeME_palettes_or_colors(selection = 'palette', quantity_colors= 8):
+def visualizeME_palettes_or_colors(selection = 'palettes', quantity_colors= 8):
     '''
-    Function that returns the possible color palettes of the Seaborn library
+    Function for consulting the colors and palettes available of the Seaborn library
     ### Parameters (2):
-        * selection: `str` by default gives 'palettes', but you can choose colors
+        * selection: `str` by default gives 'palettes', but you can choose 'colors'
         * quantity_colors: `int` by default it returns 8 colors per palette, you can change number of colors you will need. And if you want to see colors, it is not neccesary this parameter.
     ### Return (1):
         * plt.show(): available palettes/ colors with their respective names
     '''
-    colors = pd.read_csv('data/seaborn_color_list.csv')
+    colors = pd.read_csv('data/viz/seaborn_color_list.csv')
 
-    if selection == 'palette':
+    if selection == 'palettes':
         grid = np.vstack((np.linspace(0, 1, quantity_colors), np.linspace(0, 1, quantity_colors)))
         options_colors = colors['PALETTE_COLORS'].dropna().sort_values(key=lambda x: x.str.lower())
         col = 4                             
@@ -46,7 +46,7 @@ def visualizeME_palettes_or_colors(selection = 'palette', quantity_colors= 8):
     
         print('If you want any palette reversed, just add "_r" at the end of the palette name')
 
-    elif selection == 'color':
+    elif selection == 'colors':
         just_colors = sorted(colors['CSS4_COLORS'].dropna().sort_values(key=lambda x: x.str.lower()))
         col = 4                             
         pos = 1 
@@ -64,10 +64,12 @@ def visualizeME_palettes_or_colors(selection = 'palette', quantity_colors= 8):
     return plt.show()
 
 
+
 # FUNCION 2
 def visualizeME_and_describe_violinbox(dataframe, categ_var, numeric_var, palette= 'tab10', save= True):
     '''
     Function that allows to obtain a more complete graph by merging boxplot and violinplot together with a table of descriptive metrics
+    It is high recommendable! to use this type of graph for a categoric variable with 20 unique values maximum.
     ### Parameters (5):
         * dataframe: `dataframe`  origin table
         * categ_var: `str` categoric variable
@@ -122,6 +124,7 @@ def visualizeME_and_describe_violinbox(dataframe, categ_var, numeric_var, palett
     display(table)
 
 
+
 # FUNCION 3
 def visualizeME_and_describe_barplot(dataframe, categ_var, numeric_var, palette='tab10', save = True):
     '''
@@ -174,7 +177,180 @@ def visualizeME_and_describe_barplot(dataframe, categ_var, numeric_var, palette=
     display(table)
 
 
+
 # FUNCION 4
+def visualizeME_FigureWords(dataframe, categ_var, shape= 'seahorse', cmap= 'tab10', contour= 'steelblue', back_color = 'white', height= 18, width = 20, save= True):
+    '''
+    Function that returns graph of words with different shapes, with the possibility to choose between 'dino', 'heart', 'star', 'seahorse' and 'hashtag'. I hope you like it!
+    ### Parameters (9):
+        * dataframe: `dataframe` origin table
+        * categ_var: `str` categoric variable
+        * shape: `str` by default is 'seahorse' shape, but you can choose from this list: 'seahorse', 'dino', 'heart', 'star' and 'hashtag'.
+        * cmap: `str` by default is 'tab10', but you can choose your palette of Seaborn. If you want to know which palettes are available you can call visualizeME_colors_palettes() function
+        * contour: `str` by default is 'steelblue', but you can choose your favourite color
+        * back_color: `str` by default is 'white', but you can choose your background color
+        * height: `int` by default is 18, but you can select your preference on height of the figure
+        * width:`int` by default is 20, but you can select your preference on width of the figure
+        * save: `bool` by default is True in order to save your graph, but if you prefer don't save it, just choose 'False'
+    ### Return (1):
+        * plt.show(): graph with your figure(by default will be seahorse)
+    '''
+    # Shape
+    while shape not in ['dino', 'heart', 'star', 'seahorse', 'hashtag']:    
+        shape = input('Try again, what shape do you want for your figure words graph?\n*Dino\n*Heart\n*Star\n*Seahorse: ').lower()
+    if shape == 'seahorse':
+        figure = 'data/viz/seahorse_visualizeME.jpg'
+    elif shape == 'dino':
+        figure = 'data/viz/dino_steg_visualizeME.jpg'
+    elif shape == 'heart': 
+        figure = 'data/viz/corazon_visualizeME.png'
+    elif shape == 'star':
+        figure = 'data/viz/estrella-silueta_visualizeME.png'  
+    elif shape == 'hashtag':
+        figure = 'data/viz/hashtag-silueta_visualizeME.png'
+    
+    # Words
+    words = ' '.join(map(str, dataframe[categ_var]))
+    custom_mask = np.array(Image.open(figure))
+    wordcloud = WordCloud(background_color=back_color,
+                      width=2500,
+                      height=2000,
+                      max_words=500, 
+                      contour_width=0.1, 
+                      contour_color= contour, 
+                      colormap= cmap,
+                      scale =5,mask=custom_mask).generate(words)
+    
+    plt.figure(1, figsize = (height, width))
+    plt.imshow(wordcloud, interpolation='bilinear')
+    plt.axis('off')
+
+    # Save Graph
+    if save == True:
+        figure = figure.split('/')[1]
+        figure = figure.split('.')[0]
+        name = 'visualizeME_Graphic_' + figure + '.png'
+        plt.savefig(name)
+    
+    return plt.show()
+
+
+
+# FUNCION 5
+def visualizeME_bagel_look_top(dataframe, categ_var, top=0, cmap = 'tab10', circle=True, save=True):
+    '''
+    Function to generate a bagel graphic where you can select the top categories you want to see, or everyone by default
+    ### Parameters (6):
+        * dataframe: `dataframe` origin table
+        * categ_var: `str` categoric variable
+        * top: `int` by default is 0, but you can choose look the top n categories and their weights.
+        * cmap: `str` by default is 'tab10', but you can choose your palette of Seaborn. If you want to know which palettes are available you can call visualizeME_colors_palettes() function
+        * circle: `bool` by default is True, in orders to seems like a bagel, but you can choose select a pie
+        * save: `bool` by default is True in order to save your graph, but if you prefer don't save it, just choose 'False'
+    '''
+    data_valores= dataframe[categ_var].value_counts()
+    # Filter by top categories
+    if top != 0:
+        data_valores_top= data_valores[(top):]
+        p=0
+        for i in data_valores_top:
+            p=i+p
+        data_valores_top=pd.Series([p],index=[f"Resto [{len(data_valores_top.index)}]"])
+        data_valores_max= data_valores[:(top)]
+        data_valores=pd.concat([data_valores_max, data_valores_top])
+    
+    # Generate graph
+    plt.figure(figsize=(10,10))
+    plt.pie(data_valores.values, labels=data_valores.index, textprops={"fontsize":15}, startangle = 60, autopct='%1.2f%%', frame=False, colors= sns.color_palette(cmap))
+    p=plt.gcf()
+    if circle is True:
+        my_circle=plt.Circle((0,0), 0.4, color="w")
+        p.gca().add_artist(my_circle)
+    titulo= 'DISTRIBUCIÓN DE ' + categ_var.upper()
+    plt.title(titulo, fontsize= 20)
+
+    # Save graph
+    if save == True:
+        path=os.path.join('visualizeME_Graphic_baggel_' + titulo.lower() + '.png')
+        plt.savefig(path, format='png', dpi=300)
+    
+    # Generate table
+    values_bagel = pd.DataFrame(dataframe[categ_var].value_counts())
+    new_list = []
+    for i in list(dataframe[categ_var].value_counts()):
+        sumat = sum(list(dataframe[categ_var].value_counts()))
+        peso = i/sumat
+        new_list.append(peso)
+    porcentaj_nums = list(map(lambda x : x * 100, new_list))
+    porcentaj_round3 = list(map(lambda x : round(x,2), porcentaj_nums))
+    porcentaj = list(map(lambda x : str(x) + '%', porcentaj_round3))
+    values_bagel['Pesos(%)'] = porcentaj
+
+    # Save table
+    if save == True:
+        name = 'visualizeME_table_bagel_' + titulo.lower() + '.csv'
+        values_bagel.to_csv(name, header=True)
+    
+    plt.show()
+    return display(values_bagel)
+
+
+
+#FUNCION 6
+def visualizeME_and_describe_Spidey(dataframe, save= True):
+    '''
+    ## IMPORTANT: This function its just for SCALED dataframe (just numeric variables).
+    ## If you don't have scaled your variables, please first do it!!!
+    This function  generate a polar chart with your numeric 
+    variables in order to compare their means.
+    ### Parameters (2):
+        * dataframe: `dataframe` origin table
+        * save: `bool` by default is True in order to save your graph, but if you prefer don't save it, just choose 'False'
+    '''
+    spidey = pd.DataFrame(dataframe.mean(), columns=['Means'])
+
+    categories=list(dataframe.columns)
+    categories+=categories[:1]
+    num =len(categories)
+
+    # variables means
+    value=list(dataframe.mean())
+    value+=value[:1]
+
+    loc_label = np.linspace(start=0, stop=2*np.pi, num= num)
+
+    plt.figure(figsize=(10,10))
+    ax = plt.subplot(polar=True)
+    plt.plot(loc_label, value)
+    plt.fill(loc_label, value, 'blue', alpha=0.1)
+    # use thetagrids to place labels at the specified angles using degrees
+    lines, labels = plt.thetagrids(np.degrees(loc_label), labels=categories)
+
+    # Comienza radar chart arriba y hacia la derecha las variables
+    ax.set_theta_offset(np.pi / 2)
+    ax.set_theta_direction(-1)
+    ax.set_rlabel_position(0)
+
+    titulo= 'SPIDEY CHART TO COMPARE MEANS OF SCALED NUMERIC VARIABLES'
+    plt.title(titulo, y=1.1, fontdict={'fontsize': 18})
+    plt.legend(labels=['Mean'],loc=(1, 1))
+
+    # Save graph
+    if save == True:
+        path=os.path.join('visualizeME_Graphic_' + titulo.lower() + '.png')
+        plt.savefig(path, format='png', dpi=300)
+
+    # Save Table
+    if save == True:
+        name = 'visualizeME_table_' + titulo.lower() + '.csv'
+        spidey.to_csv(name, header=True)
+
+    plt.show()
+    return display(spidey)
+
+
+
+#FUNCION 7
 def visualizeME_c_matrix(y_true, 
                         y_pred, 
                         title='',
@@ -408,1096 +584,9 @@ def visualizeME_c_matrix(y_true,
     return cfm, metrics
 
 
-# FUNCION 5
-def visualizeME_FigureWords(dataframe, categ_var, shape= 'seahorse', cmap= 'tab10', contour= 'steelblue', back_color = 'white', height= 18, width = 20, save= True):
-    '''
-    Function that returns graph of words with different shapes, with the possibility to choose between 'dino', 'heart', 'star', 'seahorse' and 'hashtag'. I hope you like it!
-    ### Parameters (9):
-        * dataframe: `dataframe` origin table
-        * categ_var: `str` categoric variable
-        * shape: `str` by default is 'seahorse' shape, but you can choose from this list: 'seahorse', 'dino', 'heart', 'star' and 'hashtag'.
-        * cmap: `str` by default is 'tab10', but you can choose your palette of Seaborn. If you want to know which palettes are available you can call visualizeME_colors_palettes() function
-        * contour: `str` by default is 'steelblue', but you can choose your favourite color
-        * back_color: `str` by default is 'white', but you can choose your background color
-        * height: `int` by default is 18, but you can select your preference on height of the figure
-        * width:`int` by default is 20, but you can select your preference on width of the figure
-        * save: `bool` by default is True in order to save your graph, but if you prefer don't save it, just choose 'False'
-    ### Return (1):
-        * plt.show(): graph with your figure(by default will be seahorse)
-    '''
-    # Shape
-    while shape not in ['dino', 'heart', 'star', 'seahorse', 'hashtag']:    
-        shape = input('Try again, what shape do you want for your figure words graph?\n*Dino\n*Heart\n*Star\n*Seahorse: ').lower()
-    if shape == 'seahorse':
-        figure = 'data/seahorse_visualizeME.jpg'
-    elif shape == 'dino':
-        figure = 'data/dino_steg_visualizeME.jpg'
-    elif shape == 'heart': 
-        figure = 'data/corazon_visualizeME.png'
-    elif shape == 'star':
-        figure = 'data/estrella-silueta_visualizeME.png'  
-    elif shape == 'hashtag':
-        figure = 'data/hashtag-silueta_visualizeME.png'
-    
-    # Words
-    words = ' '.join(map(str, dataframe[categ_var]))
-    custom_mask = np.array(Image.open(figure))
-    wordcloud = WordCloud(background_color=back_color,
-                      width=2500,
-                      height=2000,
-                      max_words=500, 
-                      contour_width=0.1, 
-                      contour_color= contour, 
-                      colormap= cmap,
-                      scale =5,mask=custom_mask).generate(words)
-    
-    plt.figure(1, figsize = (height, width))
-    plt.imshow(wordcloud, interpolation='bilinear')
-    plt.axis('off')
 
-    # Save Graph
-    if save == True:
-        figure = figure.split('/')[1]
-        figure = figure.split('.')[0]
-        name = 'visualizeME_Graphic_' + figure + '.png'
-        plt.savefig(name)
-    
-    return plt.show()
-
-
-# FUNCION 6
-def visualizeME_bagel_look_top(dataframe, categ_var, top=0, cmap = 'tab10', circle=True, save=True):
-    '''
-    Function to generate a bagel graphic where you can select the top categories you want to see, or everyone by default
-    ### Parameters (6):
-        * dataframe: `dataframe` origin table
-        * categ_var: `str` categoric variable
-        * top: `int` by default is 0, but you can choose look the top n categories and their weights.
-        * cmap: `str` by default is 'tab10', but you can choose your palette of Seaborn. If you want to know which palettes are available you can call visualizeME_colors_palettes() function
-        * circle: `bool` by default is True, in orders to seems like a bagel, but you can choose select a pie
-        * save: `bool` by default is True in order to save your graph, but if you prefer don't save it, just choose 'False'
-    '''
-    data_valores= dataframe[categ_var].value_counts()
-    # Filter by top categories
-    if top != 0:
-        data_valores_top= data_valores[(top):]
-        p=0
-        for i in data_valores_top:
-            p=i+p
-        data_valores_top=pd.Series([p],index=[f"Resto [{len(data_valores_top.index)}]"])
-        data_valores_max= data_valores[:(top)]
-        data_valores=pd.concat([data_valores_max, data_valores_top])
-    
-    # Generate graph
-    plt.figure(figsize=(10,10))
-    plt.pie(data_valores.values, labels=data_valores.index, textprops={"fontsize":15}, startangle = 60, autopct='%1.2f%%', frame=False, colors= sns.color_palette(cmap))
-    p=plt.gcf()
-    if circle is True:
-        my_circle=plt.Circle((0,0), 0.4, color="w")
-        p.gca().add_artist(my_circle)
-    titulo= 'DISTRIBUCIÓN DE ' + categ_var.upper()
-    plt.title(titulo, fontsize= 20)
-
-    # Save graph
-    if save == True:
-        path=os.path.join('visualizeME_Graphic_baggel_' + titulo.lower() + '.png')
-        plt.savefig(path, format='png', dpi=300)
-    
-    # Generate table
-    values_bagel = pd.DataFrame(dataframe[categ_var].value_counts())
-    new_list = []
-    for i in list(dataframe[categ_var].value_counts()):
-        sumat = sum(list(dataframe[categ_var].value_counts()))
-        peso = i/sumat
-        new_list.append(peso)
-    porcentaj_nums = list(map(lambda x : x * 100, new_list))
-    porcentaj_round3 = list(map(lambda x : round(x,2), porcentaj_nums))
-    porcentaj = list(map(lambda x : str(x) + '%', porcentaj_round3))
-    values_bagel['Pesos(%)'] = porcentaj
-
-    # Save table
-    if save == True:
-        name = 'visualizeME_table_bagel_' + titulo.lower() + '.csv'
-        values_bagel.to_csv(name, header=True)
-    
-    plt.show()
-    return display(values_bagel)
-
-
-#FUNCION 7
-def visualizeME_and_describe_Spidey(dataframe, save= True):
-    '''
-    This function  generate a polar chart with your numeric variables in order to compare their means. Important!! first scale your numeric variables.
-    ### Parameters (2):
-        * dataframe: `dataframe` origin table
-        * save: `bool` by default is True in order to save your graph, but if you prefer don't save it, just choose 'False'
-    '''
-    spidey = pd.DataFrame(dataframe.iloc[:,0:-1].mean(), columns=['Means'])
-
-    categories=list(dataframe.iloc[:,0:-1].columns)
-    categories+=categories[:1]
-    num =len(categories)
-
-    # variables means
-    value=list(dataframe.iloc[:,0:-1].mean())
-    value+=value[:1]
-
-    loc_label = np.linspace(start=0, stop=2*np.pi, num= num)
-
-    plt.figure(figsize=(10,10))
-    ax = plt.subplot(polar=True)
-    plt.plot(loc_label, value)
-    plt.fill(loc_label, value, 'blue', alpha=0.1)
-    # use thetagrids to place labels at the specified angles using degrees
-    lines, labels = plt.thetagrids(np.degrees(loc_label), labels=categories)
-
-    # Comienza radar chart arriba y hacia la derecha las variables
-    ax.set_theta_offset(np.pi / 2)
-    ax.set_theta_direction(-1)
-    ax.set_rlabel_position(0)
-
-    titulo= 'SPIDEY CHART TO COMPARE MEANS OF SCALED NUMERIC VARIABLES'
-    plt.title(titulo, y=1.1, fontdict={'fontsize': 18})
-    plt.legend(labels=['Mean'],loc=(1, 1))
-
-    # Save graph
-    if save == True:
-        path=os.path.join('visualizeME_Graphic_' + titulo.lower() + '.png')
-        plt.savefig(path, format='png', dpi=300)
-
-    # Save Table
-    if save == True:
-        name = 'visualizeME_table_' + titulo.lower() + '.csv'
-        spidey.to_csv(name, header=True)
-
-    plt.show()
-    return display(spidey)
-
-
-
-# FUNCION 8 -> La deja subida Natalia
-
-def basic_scatterplot(dataframe,numeric_var1,numeric_var2,title,xlabel,ylabel,palette):
-    '''
-    This function shows the graph scatterplot.
-    ### Parameters(7):
-        * dataframe: `dataframe`  origin table
-        * numeric_var1: `str` variable
-        * numeric_var2: `str` variable
-        * title: 'str' graph's title
-        * xlabel: Function x title
-        * ylabel: Function x title
-        * palette: `str` argument to choose color palett
-    '''
-    plt.figure(figsize=(13,7))
-    sns.scatterplot(data = dataframe, x = numeric_var1, y = numeric_var2, palette = palette)
-    plt.title(title)
-    plt.xlabel(xlabel)
-    plt.ylabel(ylabel)
-    plt.show()
-
-
-def ej_basic_scatterplot():
-    '''
-    This function shows an example of the graph
-    '''
-    dataframe = sns.load_dataset("tips")
-    print("SCATTER PLOT")
-    basic_scatterplot(dataframe,"tip","total_bill","TIP VS TOTAL PAID","Tip","Total paid","tab10")
-
-ej_basic_scatterplot()
-
-
-def write_basic_scatterplot():
-    '''
-    This function shows the graph's code.
-    '''
-    print("You can use this function -> basic_scatterplot(dataframe,numeric_var1,numeric_var2,title,xlabel,ylabel,palette)")
-
-write_basic_scatterplot()
-
-
-
-# STATTER PLOT
-# ADVANCE
-
-def advance_scatterplot(dataframe,numeric_var1,numeric_var2,categ_var,title,xlabel,ylabel,palette):
-    '''
-    This function shows the graph scatterplot.
-    ### Parameters(9):
-        * dataframe: `dataframe`  origin table
-        * numeric_var1: `str` variable
-        * numeric_var2: `str` variable
-        * categ_var: `str` variable
-        * title: 'str' graph's title
-        * xlabel: Function x title
-        * ylabel: Function x title
-        * palette: `str` argument to choose color palett
-    '''
-    plt.figure(figsize=(13,7))
-    sns.scatterplot(data = dataframe, x = numeric_var1, y = numeric_var2, 
-                    hue = categ_var, palette = palette,
-                    style = categ_var,markers = ["^", "v"])
-    plt.legend(bbox_to_anchor=(1, 1), loc=2) ;
-    plt.title(title)
-    plt.xlabel(xlabel)
-    plt.ylabel(ylabel)
-    plt.show()  
-
-
-def ej_advance_scatterplot():
-    '''
-    This function shows an example of the graph
-    '''
-    dataframe = sns.load_dataset("tips")
-    print("SCATTER PLOT")
-    advance_scatterplot(dataframe,"tip","total_bill","sex","TIP VS TOTAL PAID","Tip","Total paid","tab10")
-
-ej_advance_scatterplot()
-
-
-def write_advance_scatterplot():
-    '''
-    This function shows the graph's code.
-    '''
-    print("You can use this function -> advance_scatterplot(dataframe,numeric_var1,numeric_var2,categ_var,title,xlabel,ylabel,palette)")
-
-write_advance_scatterplot()
-
-
-# LINE PLOT
-# BASIC
-
-def basic_lineplot(dataframe,numeric_var1,numeric_var2,title,xlabel,ylabel,palette):
-    '''
-    This function shows the graph lineplot.
-    ### Parameters(7):
-        * dataframe: `dataframe`  origin table
-        * numeric_var1: `str` variable
-        * numeric_var2: `str` variable
-        * title: 'str' graph's title
-        * xlabel: Function x title
-        * ylabel: Function x title
-        * palette: `str` argument to choose color palett
-    '''
-    plt.figure(figsize=(13,7))
-    sns.lineplot(data = dataframe, x = numeric_var1, y = numeric_var2, palette = palette)
-    plt.title(title)
-    plt.xlabel(xlabel)
-    plt.ylabel(ylabel)
-    plt.show()
-
-
-def ej_basic_lineplot():
-    '''
-    This function shows an example of the graph
-    '''
-    dataframe = sns.load_dataset("flights")
-    print("LINE PLOT")
-    basic_lineplot(dataframe,"year","passengers","TOTAL PASSENGERS PER YEAR","Year","Total passengers","tab10")
-
-ej_basic_lineplot()
-
-
-def write_basic_lineplot():
-    '''
-    This function shows the graph's code.
-    '''
-    print("You can use this function -> basic_lineplot(dataframe,numeric_var1,numeric_var2,title,xlabel,ylabel,palette)")
-    
-write_basic_lineplot()
-
-
-
-# LINE PLOT
-# ADVANCE
-
-def advance_lineplot(dataframe,numeric_var1,numeric_var2,categ_var,title,xlabel,ylabel,palette):
-    '''
-    This function shows the graph lineplot.
-    ### Parameters(8):
-        * dataframe: `dataframe`  origin table
-        * numeric_var1: `str` variable
-        * numeric_var2: `str` variable
-        * categ_var: `str` variable
-        * title: 'str' graph's title
-        * xlabel: Function x title
-        * ylabel: Function x title
-        * palette: `str` argument to choose color palett
-    '''
-    plt.figure(figsize=(13,7))
-    sns.lineplot(data = dataframe, x = numeric_var1, y = numeric_var2,
-                hue = categ_var, palette = palette)
-    plt.legend(bbox_to_anchor=(1, 1), loc=2) ;
-    plt.title(title)
-    plt.xlabel(xlabel)
-    plt.ylabel(ylabel)
-    plt.show()
-
-
-def ej_advance_lineplot():
-    '''
-    This function shows an example of the graph
-    '''
-    dataframe = sns.load_dataset("flights")
-    print("LINE PLOT")
-    advance_lineplot(dataframe,"year","passengers","month","TOTAL PASSENGERS PER YEAR","Year","Total passengers","tab10")
-
-ej_advance_lineplot()
-
-
-def write_advance_lineplot():
-    '''
-    This function shows the graph's code.
-    '''
-    print("You can use this function -> advance_lineplot(dataframe,numeric_var1,numeric_var2,categ_var,title,xlabel,ylabel,palette)")
-
-write_advance_lineplot()
-
-
-
-# HISTPLOT
-# BASIC
-def basic_histplot(dataframe,numeric_var,title,xlabel,palette):
-    '''
-    This function shows the graph histplot.
-    ### Parameters(5):
-        * dataframea: `dataframe`  origin table
-        * numeric_var: `str` variable
-        * title: 'str' graph's title
-        * xlabel: Function x title
-        * palette: `str` argument to choose color palett
-    '''
-    plt.figure(figsize=(13,7))
-    sns.histplot(data = dataframe, x = numeric_var, palette = palette)
-    plt.title(title)
-    plt.xlabel(xlabel)
-    plt.show()
-
-
-def ej_basic_histplot():
-    '''
-    This function shows an example of the graph
-    '''
-    dataframe = sns.load_dataset("penguins")
-    print("HISTPLOT")
-    basic_histplot(dataframe,"body_mass_g","PENGUINS BODY MASS", "Body mass","tab10")
-
-ej_basic_histplot()
-
-
-def write_basic_histplot():
-    '''
-    This function shows the graph's code.
-    '''
-    print("You can use this function -> basic_histplot(dataframe,numeric_var,title,xlabel,palette)")
-
-write_basic_histplot()
-
-
-# HISTPLOT
-# ADVANCE
-def basic_histplot(dataframe,numeric_var,categ_var,title,xlabel,palette):
-    '''
-    This function shows the graph histplot.
-    ### Parameters(5):
-        * dataframea: `dataframe`  origin table
-        * x: `str` variable
-        * title: 'str' graph's title
-        * xlabel: Function x title
-        * palette: `str` argument to choose color palett
-    '''
-    plt.figure(figsize=(13,7))
-    sns.histplot(data = dataframe, x = numeric_var, palette = palette, hue = categ_var)
-    plt.title(title)
-    plt.xlabel(xlabel)
-    plt.show()
-
-
-def ej_basic_histplot():
-    '''
-    This function shows an example of the graph
-    '''
-    dataframe = sns.load_dataset("penguins")
-    print("HISTPLOT")
-    basic_histplot(dataframe,"body_mass_g","sex","PENGUINS BODY MASS", "Body mass","tab10")
-
-ej_basic_histplot()
-
-
-def write_basic_histplot():
-    '''
-    This function shows the graph's code.
-    '''
-    print("You can use this function -> basic_histplot(dataframe,numeric_var,categ_var,title,xlabel,palette)")
-
-write_basic_histplot()
-
-
-# BARPLOT
-# BASIC
-
-
-def basic_barplot(dataframe,numeric_var,categ_var,title,xlabel,ylabel,palette):
-    '''
-    This function shows the graph barplot.
-    ### Parameters(8):
-        * dataframe: `dataframe`  origin table
-        * x: `str` variable
-        * y: `str` variable
-        * tupla_categ_var: `tupla` with categ_var variables
-        * title: 'str' graph's title
-        * xlabel: Function x title
-        * ylabel: Function x title
-        * palette: `str` argument to choose color palett
-    '''
-    plt.figure(figsize=(13,7))
-    sns.barplot(data = dataframe, x = numeric_var, y = categ_var, palette = palette,
-                ci = None)
-    plt.title(title)
-    plt.xlabel(xlabel)
-    plt.ylabel(ylabel)
-    plt.show()
-
-
-def ej_basic_barplot():
-    '''
-    This function shows an example of the graph
-    '''
-    dataframe = sns.load_dataset("titanic")
-    print("BARPLOT")
-    basic_barplot(dataframe,"class","fare","AVERAGE PAID ACCORDING TO SOCIAL CLASS","Social class","Average paid","tab10")
-
-ej_basic_barplot()
-
-
-def write_basic_barplot():
-    '''
-    This function shows the graph's code.
-    '''
-    print("You can use this function -> basic_barplot(dataframe,numeric_var,categ_var,title,xlabel,ylabel,palette)")
-
-write_basic_barplot()
-
-
-# BARPLOT
-# ADVANCE
-
-def advance_barplot(dataframe,numeric_var,categ_var1,categ_var2,title,xlabel,ylabel,palette):
-    '''
-    This function shows the graph barplot.
-    ### Parameters(8):
-        * dataframe: `dataframe`  origin table
-        * numeric_var: `str` variable
-        * categ_var1: `str` variable
-        * categ_var2: `str` variable
-        * title: 'str' graph's title
-        * xlabel: Function x title
-        * ylabel: Function x title
-        * palette: `str` argument to choose color palett
-    '''
-    plt.figure(figsize=(13,7))
-    sns.barplot(data = dataframe, x = numeric_var, y = categ_var1, 
-                hue = categ_var2, palette = palette, ci = None)
-    plt.legend(bbox_to_anchor=(1, 1), loc=2) ;
-    plt.title(title)
-    plt.xlabel(xlabel)
-    plt.ylabel(ylabel)
-    plt.show()
-
-
-def ej_advance_barplot():
-    '''
-    This function shows an example of the graph
-    '''
-    dataframe = sns.load_dataset("titanic")
-    print("BARPLOT")
-    advance_barplot(dataframe,"class","fare","sex","AVERAGE PAID ACCORDING TO SOCIAL CLASS","Social class","Average paid","tab10")
-
-ej_advance_barplot()
-
-
-def write_advance_barplot():
-    '''
-    This function shows the graph's code.
-    '''
-    print("You can use this function -> advance_barplot(dataframe,numeric_var,categ_var1,categ_var2,title,xlabel,ylabel,palette)")
-
-write_advance_barplot()
-
-
-# DENSIDAD
-# BASIC
-
-def basic_density(dataframe,numeric_var,title,xlabel,ylabel,palette):
-    '''
-    This function shows the graph density.
-    ### Parameters(6):
-        * dataframe: `dataframe`  origin table
-        * numeric_var: `str` variable
-        * title: 'str' graph's title
-        * xlabel: Function x title
-        * ylabel: Function x title
-        * palette: `str` argument to choose color palett
-    '''
-    plt.figure(figsize=(13,7))
-    sns.kdeplot(data = dataframe, x = numeric_var, palette = palette)
-    plt.title(title)
-    plt.xlabel(xlabel)
-    plt.ylabel(ylabel)
-    plt.show()
-
-
-def ej_basic_density():
-    '''
-    This function shows an example of the graph
-    '''
-    dataframe = sns.load_dataset("titanic")
-    print("DENSITY")
-    basic_density(dataframe,"age", "PASSSENGERS AGE", "Age", "Density","tab10")
-
-ej_basic_density()
-
-
-def write_basic_density():
-    '''
-    This function shows the graph's code.
-    '''
-    print("You can use this function -> basic_density(dataframe,numeric_var,title,xlabel,ylabel,palette)")
-
-write_basic_density()
-
-
-# DENSIDAD
-# ADVANCE
-
-def advance_density(dataframe,numeric_var,categ_var,title,xlabel,ylabel,palette):
-    '''
-    This function shows the graph density.
-    ### Parameters(7):
-        * dataframe: `dataframe`  origin table
-        * numeric_var: `str` variable
-        * categ_var: `str` variable
-        * title: 'str' graph's title
-        * xlabel: Function x title
-        * ylabel: Function x title
-        * palette: `str` argument to choose color palett
-    '''
-    plt.figure(figsize=(13,7))
-    sns.kdeplot(data = dataframe, x = numeric_var, 
-                hue = categ_var, palette = palette, multiple = "stack")
-    plt.title(title)
-    plt.xlabel(xlabel)
-    plt.ylabel(ylabel)
-    plt.show()
-
-
-def ej_advance_density():
-    '''
-    This function shows an example of the graph
-    '''
-    dataframe = sns.load_dataset("titanic")
-    print("DENSITY PLOT")
-    advance_density(dataframe,"age", "sex", "PASSSENGERS AGE", "Age", "Density","tab10")
-
-ej_advance_density()
-
-
-def write_advance_density():
-    '''
-    This function shows the graph's code.
-    '''
-    print("You can use this function -> advance_density(dataframe,numeric_var,categ_var,title,xlabel,ylabel,palette")
-
-write_advance_density()
-
-
-# BOXPLOT
-# BASIC
-
-def basic_boxplot(dataframe,categ_var,numeric_var,title,xlabel,ylabel,palette):
-    '''
-    This function shows the graph boxplot.
-    ### Parameters(7):
-        * dataframe: `dataframe`  origin table
-        * categ_var: `str` variable
-        * numeric_var: `str` variable
-        * title: 'str' graph's title
-        * xlabel: Function x title
-        * ylabel: Function x title
-        * palette: `str` argument to choose color palett
-    '''
-    plt.figure(figsize=(13,7))
-    sns.boxplot(data = dataframe, x = categ_var, y = numeric_var, palette = palette)
-    plt.title(title)
-    plt.xlabel(xlabel)
-    plt.ylabel(ylabel)
-    plt.show()
-
-
-def ej_basic_boxplot():
-    '''
-    This function shows an example of the graph
-    '''
-    dataframe = sns.load_dataset("tips")
-    print("BOXPLOT")
-    basic_boxplot(dataframe,"day","tip","TIP DEPENDING ON THE DAY","Day","Tip","tab10")
-
-ej_basic_boxplot()
-
-
-def write_basic_boxplot():
-    '''
-    This function shows the graph's code.
-    '''
-    print("You can use this function -> basic_boxplot(dataframe,categ_var,numeric_var,title,xlabel,ylabel,palette)")
-
-write_basic_boxplot()
-
-
-
-# BOXPLOT
-# ADVANCE
-
-def advance_boxplot(dataframe,categ_var1, numeric_var1, categ_var2,title,xlabel,ylabel,palette):
-    '''
-    This function shows the graph boxplot.
-    ### Parameters(8):
-        * dataframe: `dataframe`  origin table
-        * categ_var1: `str` variable
-        * categ_var2: `str` variable
-        * numeric_var1: `str` variable
-        * title: 'str' graph's title
-        * xlabel: Function x title
-        * ylabel: Function x title
-        * palette: `str` argument to choose color palett
-    '''
-    plt.figure(figsize=(13,7))
-    sns.boxplot(data = dataframe, x = categ_var1, y = numeric_var1,
-                palette = palette, hue = categ_var2)
-    plt.legend(bbox_to_anchor=(1, 1), loc=2) ;
-    plt.title(title)
-    plt.xlabel(xlabel)
-    plt.ylabel(ylabel)
-    plt.show()
-
-
-def ej_advance_boxplot():
-    '''
-    This function shows an example of the graph
-    '''
-    dataframe = sns.load_dataset("tips")
-    print("BOXPLOT")
-    advance_boxplot(dataframe,"time","tip","smoker","TIP DEPENDING ON THE DAY","Day","Tip","tab10")
-
-ej_advance_boxplot()
-
-
-def write_advance_boxplot():
-    '''
-    This function shows the graph's code.
-    '''
-    print("You can use this function -> advance_boxplot(dataframe,categ_var1,numeric_var1,categ_var2,title,xlabel,ylabel,palette)")
-
-write_advance_boxplot()
-
-
-
-# VIOLINPLOT
-# BASIC
-
-def basic_violinplot(dataframe,categ_var,numeric_var,title,xlabel,ylabel,palette):
-    '''
-    This function shows the graph violinplot.
-    ### Parameters(6):
-        * dataframe: `dataframe`  origin table
-        * categ_var: `str` variable
-        * numeric_var: `str` variable
-        * title: 'str' graph's title
-        * xlabel: Function x title
-        * ylabel: Function x title
-        * palette: `str` argument to choose color palett
-    '''
-    plt.figure(figsize=(13,7))
-    sns.violinplot(data = dataframe, x = categ_var, y = numeric_var, palette = palette)
-    plt.title(title)
-    plt.xlabel(xlabel)
-    plt.ylabel(ylabel)
-    plt.show()
-
-
-def ej_basic_violinplot():
-    '''
-    This function shows an example of the graph
-    '''
-    dataframe = sns.load_dataset("tips")
-    print("VIOLINPLOT")
-    basic_violinplot(dataframe,"day","tip","TIP DEPENDING ON THE DAY","Day","Tip","tab10")
-
-ej_basic_violinplot()
-
-
-def write_basic_violinplot():
-    '''
-    This function shows the graph's code.
-    '''
-    print("You can use this function -> basic_violinplot(dataframe,categ_var,numeric_var,title,xlabel,ylabel,palette)")
-
-write_basic_violinplot()
-
-
-
-# VIOLINPLOT
-# ADVANCE
-
-def advance_violinplot(dataframe,categ_var1,numeric_var,categ_var2,title,xlabel,ylabel,palette):
-    '''
-    This function shows the graph violinplot.
-    ### Parameters(7):
-        * dataframe: `dataframe`  origin table
-        * categ_var1: `str` variable
-        * categ_var2: `str` variable
-        * numeric_var: `str` variable
-        * title: 'str' graph's title
-        * xlabel: Function x title
-        * ylabel: Function x title
-        * palette: `str` argument to choose color palett
-    '''
-    plt.figure(figsize=(13,7))
-    sns.violinplot(data = dataframe, x = categ_var1, y = numeric_var, palette = palette,hue=categ_var2)
-    plt.legend(bbox_to_anchor=(1, 1), loc=2) ;
-    plt.title(title)
-    plt.xlabel(xlabel)
-    plt.ylabel(ylabel)
-    plt.show()
-
-
-def ej_advance_violinplot():
-    '''
-    This function shows an example of the graph
-    '''
-    dataframe = sns.load_dataset("tips")
-    print("VIOLINPLOT")
-    advance_violinplot(dataframe,"day","tip","smoker","TIP DEPENDING ON THE DAY","Day","Tip","tab10")
-
-ej_advance_violinplot()
-
-
-def write_advance_violinplot():
-    '''
-    This function shows the graph's code.
-    '''
-    print("You can use this function -> advance_violinplot(dataframe,categ_var1,y,categ_var2,title,xlabel,ylabel,palette)")
-
-write_advance_violinplot()
-
-
-# COUNTPLOT
-# BASIC
-
-def basic_countplot(dataframe,categ_var,title,xlabel,palette):
-    '''
-    This function shows the graph countplot.
-    ### Parameters(5):
-        * dataframe: `dataframe`  origin table
-        * categ_var: `str` variable
-        * title: 'str' graph's title
-        * xlabel: Function x title
-        * palette: `str` argument to choose color palett
-    '''
-    plt.figure(figsize=(13,7))
-    sns.countplot(data=dataframe,x=categ_var, palette=palette)
-    plt.title(title)
-    plt.xlabel(xlabel)
-    plt.show()
-
-
-def ej_basic_countplot():
-    '''
-    This function shows an example of the graph
-    '''
-    dataframe = sns.load_dataset("titanic")
-    print("COUNTPLOT")
-    basic_countplot(dataframe,"class","TITANIC","class","tab10")
-
-ej_basic_countplot()
-
-
-def write_basic_countplot():
-    '''
-    This function shows the graph's code.
-    '''
-    print("You can use this function -> basic_countplot(dataframe,categ_var,title,xlabel,palette)")
-
-write_basic_countplot()
-
-
-# COUNTPLOT
-# ADVANCE
-
-def advance_countplot(dataframe,categ_var1,categ_var2,title,xlabel,palette):
-    '''
-    This function shows the graph countplot.
-    ### Parameters(6):
-        * dataframe: `dataframe`  origin table
-        * categ_var1: `str` variable
-        * categ_var2: `str` variable
-        * title: 'str' graph's title
-        * xlabel: Function x title
-        * palette: `str` argument to choose color palett
-    '''
-    plt.figure(figsize=(13,7))
-    sns.countplot(data=dataframe,x=categ_var1, hue=categ_var2, palette=palette)
-    plt.legend(bbox_to_anchor=(1, 1), loc=2) ;
-    plt.title(title)
-    plt.xlabel(xlabel)
-    plt.show()
-
-
-def ej_advance_countplot():
-    '''
-    This function shows an example of the graph
-    '''
-    dataframe = sns.load_dataset("titanic")
-    advance_countplot(dataframe,"class","who","TITANIC","class","tab10")
-
-ej_advance_countplot()
-
-
-def write_advance_countplot():
-    '''
-    This function shows the graph's code.
-    '''
-    print("You can use this function -> advance_countplot(dataframe,categ_var1,categ_var2,title,xlabel,palette)")
-
-write_advance_countplot()
-
-
-
-# PIE
-# BASIC
-
-def basic_pie(dataframe,categ_var,title):
-    '''
-    This function shows the graph pie.
-    ### Parameters(3):
-        * dataframe: `dataframe`  origin table
-        * x: `str` variable
-        * categ_var: `str` variable
-    '''
-    plt.figure(figsize=(13,7))
-    df1 = pd.DataFrame(dataframe[categ_var].value_counts().reset_index())
-    plt.pie(data=df1,x=categ_var,labels='index', autopct='%.1f%%')
-    plt.title(title)
-    plt.show()
-
-
-def ej_basic_pie():
-    '''
-    This function shows an example of the graph
-    '''
-    dataframe = sns.load_dataset("titanic")
-    print("PIE")
-    basic_pie(dataframe,"sex","SEX")
-
-ej_basic_pie()
-
-
-def write_basic_pie():
-    print("You can use this function -> basic_pie(dataframe,categ_var,title)")
-    '''
-    This function shows the graph's code.
-    '''
-
-write_basic_pie()
-
-
-
-def var_question():
-    '''
-    This function allows to choose how many features the user needs and if they are numeric or categorical values.
-    '''
-    while True:
-        var = input(str('Do you need 1, 2 or 3 features?'))
-        if var == "1":
-            if var == "1":
-                types = input(str('What do you want to cross? 1: a numeric variable, 2: a category variable (Please answer 1 or 2')).lower()
-                if types == "1":
-                    types = "numeric"
-                    return types
-                elif types == "2":
-                    types = "categoric"
-                    return types
-        elif var == "2":
-            types = input(str('What do you want to cross? 1: a numeric variable with a category variable, 2: a numeric with another numeric, 3: a category with another category (Please answer 1 or 2')).lower()
-            if types == "1":
-                types = "numeric_categoric"
-                return types
-            if types == "2":
-                types = "numeric_numeric"
-                return types
-            if types == "3":
-                types = "categoric_categoric"
-                return types
-        elif var == "3":
-            types = input(str('What do you want to cross? op.1: one numerical variable with two categories, op.2: two numerical variables with one category (Please answer 1 or 2')).lower()
-            if types == "1":
-                types = "numeric_categoric_categoric"
-                return types
-            if types == "2":
-                types = "numeric_numeric_categoric"
-                return types
-
-
-def show_graph(types):
-    '''
-    This function shows, according to whether values are numeric or categorical, what kind of graph the user can choose from.
-    ### Parameters (1):
-        * types: It specifies whether it is a numeric or categorical kind of feature.
-    ### Return (1):
-        * graph: Returns the graph
-    
-    '''
-    while True:
-        if types == "categoric":
-            print("1")
-            ej_basic_countplot()
-            print("2")
-            ej_basic_density()
-            print("3")
-            ej_basic_pie()
-            graph = input('What graph do you want to use? Choose a number').lower() 
-            return graph
-
-        elif types == "numeric":
-            print("1")
-            ej_basic_histplot()
-            graph = input('What graph do you want to use? Choose a number').lower() 
-            return graph
-
-        elif types == "numeric_categoric":
-            print("1")
-            ej_basic_barplot()
-            print("2")
-            ej_basic_boxplot()
-            print("3")
-            ej_basic_violinplot()
-            graph = input('What graph do you want to use? Choose a number').lower() 
-            return graph
-            
-        elif types == "numeric_numeric":
-            print("1")
-            ej_basic_scatterplot()
-            print("2")
-            ej_basic_lineplot()
-            print("3")
-            ej_basic_histplot()
-            graph = input('What graph do you want to use? Choose a number').lower() 
-            return graph
-
-        elif types == "categoric_categoric":
-            print("1")
-            ej_basic_countplot()
-            graph = input('What graph do you want to use? Choose a number').lower() 
-            return graph
-
-        elif types == "numeric_categoric_categoric":
-            print("1")
-            ej_advance_barplot()
-            print("2")
-            ej_advance_boxplot()
-            print("3")
-            ej_advance_violinplot()
-            graph = input('What graph do you want to use? Choose a number').lower() 
-            return graph
-
-
-        elif types == "numeric_numeric_categoric":
-            print("1")
-            ej_advance_scatterplot()
-            print("2")
-            ej_advance_density()
-            print("3")
-            ej_advance_lineplot()
-            graph = input('What graph do you want to use? Choose a numbero').lower() 
-            return graph
-
-
-
-def select_graph(types,graph):
-    '''
-    This function prints the line of code that you will need to create the graph.
-    ### Parameters (2):
-        * types: It specifies whether it is a numeric or categorical kind of feature.
-        * graph: Specify the graph
-    '''
-    if types == "categoric" and graph == "1":
-        write_basic_countplot()
-    elif types == "categoric" and graph == "2":
-        write_basic_density()
-    elif types == "categoric" and graph == "3":
-        write_basic_pie()
-    
-    elif types == "numeric" and graph == "1":
-        write_basic_histplot()
-
-    elif types == "numeric_categoric" and graph == "1":
-        write_basic_barplot()
-    elif types == "numeric_categoric" and graph == "2":
-        write_basic_boxplot()
-    elif types == "numeric_categoric" and graph == "3":
-        write_basic_violinplot()
-
-    elif types == "numeric_numeric" and graph == "1":
-        write_advance_scatterplot()
-    elif types == "numeric_numeric" and graph == "2":
-        write_basic_lineplot()
-    elif types == "numeric_numeric" and graph == "3":
-        write_basic_histplot()
-
-    elif types == "categoric_categoric" and graph == "1":
-        write_basic_countplot()
-
-    elif types == "numeric_categoric_categoric" and graph == "1":
-        write_advance_barplot()
-    elif types == "numeric_categoric_categoric" and graph == "2":
-        write_advance_boxplot()
-    elif types == "numeric_categoric_categoric" and graph == "3":
-        write_advance_violinplot()
-
-    elif types == "numeric_numeric_categoric" and graph == "1":
-        write_advance_scatterplot()
-    elif types == "numeric_numeric_categoric" and graph == "2":
-        write_advance_density()
-    elif types == "numeric_numeric_categoric" and graph == "3":
-        write_advance_lineplot()
-
-    else:
-        print("There is no function available for those parameters.")
-
-
-def visualize_select_graph():
-    '''
-    This function unifies all the previous ones:
-        * var_question() - This function allows to choose how many features the user needs and if they are numeric or categorical values.
-        * show_graph(types) - This function shows, according to whether values are numeric or categorical, what kind of graph the user can choose from.
-        * select_graph(types,graph) - This function prints the line of code that you will need to create the graph.
-        ### Parameters (2):
-        * types: It specifies whether it is a numeric or categorical kind of feature.
-        * graph: Specify the graph
-    '''
-    types = var_question()
-    graph = show_graph(types)
-    select_graph(types,graph)
-
-visualize_select_graph()
-
-
-
-
-
-# FUNCION 9
-def visualizeME_scores_models(y_true,models,bin_multi_classifier,vis_pallete='tab10',save = True):
+# FUNCION 8
+def visualizeME_scores_models(y_true,models,bin_multi_classifier= 'bin',pallete='tab10',save = True):
     ''' 
     This is a function that allows you to quickly identify the best metrics from your Machine Learning models whether is binary or non binary target
     ### Parameters(4):
@@ -1507,10 +596,10 @@ def visualizeME_scores_models(y_true,models,bin_multi_classifier,vis_pallete='ta
             here you should put a diccionary that contains for keys, the model names (as a str) and for values their predictions to compare with true labels.
              This will help to join all the metrics in one data frame
              EXAMPLE: {'Linear Regression':preds_multi,'KNN Classifier':preds_multi2}
-        * vis_pallete:
+        * pallete: `str`
             Seaborn color pallete we have selected before
-        * bin_multi_classifier:
-            True if it is a binomial model (0,1) and  False if it is multicategory
+        * bin_multi_classifier:`bool`
+            True if it is a binomial model (0,1) and  False for a multicategory classification
         * save=False -- `bool` 
             Saves plot and metrics (if metrics=True) to disk. If title='' default is 'classifier'.
     '''
@@ -1550,7 +639,7 @@ def visualizeME_scores_models(y_true,models,bin_multi_classifier,vis_pallete='ta
                 # Setting a bar plot to see the best Accuracy:
                 num=len(df.columns)
                 plt.figure(figsize=(num*1.5,5))
-                graf1= sns.barplot(x=df.columns,y=df.iloc[y],palette=vis_pallete)
+                graf1= sns.barplot(x=df.columns,y=df.iloc[y],palette=pallete)
                 graf1.set_xlabel('Metrics from Models',fontsize = 12)
                 graf1.set_title('Accuracy',fontsize=15,color='blue')
                 for i in graf1.patches:
@@ -1575,7 +664,7 @@ def visualizeME_scores_models(y_true,models,bin_multi_classifier,vis_pallete='ta
                 # Setting a bar plot to see the best Precision:
                 num=len(df.columns)
                 plt.figure(figsize=(num*1.5,5))
-                graf2= sns.barplot(x=df.columns,y=df.iloc[y],palette=vis_pallete)
+                graf2= sns.barplot(x=df.columns,y=df.iloc[y],palette=pallete)
                 graf2.set_xlabel('Metrics from Models',fontsize = 12)
                 graf2.set_title('Precision',fontsize=15,color='blue')
                 for i in graf2.patches:
@@ -1602,7 +691,7 @@ def visualizeME_scores_models(y_true,models,bin_multi_classifier,vis_pallete='ta
                 # Setting a bar plot to see the best Recall:
                 num=len(df.columns)
                 plt.figure(figsize=(num*1.5,5))
-                graf3= sns.barplot(x=df.columns,y=df.iloc[y],palette=vis_pallete)
+                graf3= sns.barplot(x=df.columns,y=df.iloc[y],palette=pallete)
                 graf3.set_xlabel('Metrics from Models',fontsize = 12)
                 graf3.set_title('Recall',fontsize=15,color='blue')
                 for i in graf3.patches:
@@ -1628,7 +717,7 @@ def visualizeME_scores_models(y_true,models,bin_multi_classifier,vis_pallete='ta
                 # Setting a bar plot to see the best F1 Score:
                 num=len(df.columns)
                 plt.figure(figsize=(num*1.5,5))
-                graf4= sns.barplot(x=df.columns,y=df.iloc[y],palette=vis_pallete)
+                graf4= sns.barplot(x=df.columns,y=df.iloc[y],palette=pallete)
                 graf4.set_xlabel('Metrics from Models',fontsize = 12)
                 graf4.set_title('F1 Scores',fontsize=15,color='blue')
                 for i in graf4.patches:
@@ -1653,7 +742,7 @@ def visualizeME_scores_models(y_true,models,bin_multi_classifier,vis_pallete='ta
                 # Setting a bar plot to see the best ROC AUC Score:
                 num=len(df.columns)
                 plt.figure(figsize=(num*1.5,5))
-                graf5= sns.barplot(x=df.columns,y=df.iloc[y],palette= vis_pallete)
+                graf5= sns.barplot(x=df.columns,y=df.iloc[y],palette= pallete)
                 graf5.set_xlabel('Metrics from Models',fontsize = 12)
                 graf5.set_title('ROC / AUC',fontsize=15,color='blue')
                 for i in graf5.patches:
@@ -1673,7 +762,7 @@ def visualizeME_scores_models(y_true,models,bin_multi_classifier,vis_pallete='ta
     # bin_multi_classifier is False ->>>>> Multicategorical:
     else:
         for i,j in enumerate(models):
-            report = classification_report(y_multi,values_modelo[i])
+            report = classification_report(y_true,values_modelo[i])
             report = [line.split(' ') for line in report.splitlines()]
 
             header = [x.upper()+' : '+keys_modelo[i] for x in report[0] if x!='']
@@ -1716,7 +805,7 @@ def visualizeME_scores_models(y_true,models,bin_multi_classifier,vis_pallete='ta
         # Setting a BarPlot to show the Best model Accuracy:
         num=len(acc.index)
         plt.figure(figsize=(num*1.9,4))
-        graf1= sns.barplot(data=acc,palette=vis_pallete)
+        graf1= sns.barplot(data=acc,palette=pallete)
         graf1.set_xlabel('ML Models - Results',fontsize = 12)
         graf1.set_title('Accuracy',fontsize=15,color='blue')
         for i in graf1.patches:
@@ -1733,5 +822,3 @@ def visualizeME_scores_models(y_true,models,bin_multi_classifier,vis_pallete='ta
     if save == True:
         name = 'visualizeME_df_ML_metrics' + '.csv'
         df.to_csv(name, header=True)
-
-
