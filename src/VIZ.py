@@ -64,7 +64,7 @@ def visualizeME_palettes_or_colors(selection = 'palettes', quantity_colors= 8):
     return plt.show()
 
 
-
+# FUNCTIONS FOR EDA
 # FUNCION 2
 def visualizeME_and_describe_violinbox(dataframe, categ_var, numeric_var, palette= 'tab10', save= True):
     '''
@@ -295,7 +295,7 @@ def visualizeME_bagel_look_top(dataframe, categ_var, top=0, cmap = 'tab10', circ
     return display(values_bagel)
 
 
-
+# FUNCTIONS FOR FEATURE ENGINEERING & MODELING ML
 #FUNCION 6
 def visualizeME_and_describe_Spidey(dataframe, save= True):
     '''
