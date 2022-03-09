@@ -227,9 +227,7 @@ def visualizeME_FigureWords(dataframe, categ_var, shape= 'seahorse', cmap= 'tab1
 
     # Save Graph
     if save == True:
-        figure = figure.split('/')[1]
-        figure = figure.split('.')[0]
-        name = 'visualizeME_Graphic_' + figure + '.png'
+        name = 'visualizeME_Graphic_' + shape + '.png'
         plt.savefig(name)
     
     return plt.show()
