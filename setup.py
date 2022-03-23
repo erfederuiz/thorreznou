@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
   name = 'Thorreznou',         
-  version = '0.1.4',    
+  version = '0.1.8',    
   author = 'The Bridge Data Science Team 1121',                   
   author_email = 'Thorreznou@gmail.com',
   description = '''Thorreznou.''',   
@@ -34,4 +34,5 @@ setuptools.setup(
     'pathlib'  
   ],
   python_requires=">=3.6",
+  include_package_data=True,
 )

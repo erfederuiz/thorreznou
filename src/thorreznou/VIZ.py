@@ -24,7 +24,7 @@ def visualizeME_palettes_or_colors(selection = 'palettes', quantity_colors= 8):
     ### Return (1):
         * plt.show(): available palettes/ colors with their respective names
     '''
-    colors = pd.read_csv('data/viz/seaborn_color_list.csv')
+    colors = pd.read_csv('./data/viz/seaborn_color_list.csv')
 
     if selection == 'palettes':
         grid = np.vstack((np.linspace(0, 1, quantity_colors), np.linspace(0, 1, quantity_colors)))
@@ -199,15 +199,15 @@ def visualizeME_FigureWords(dataframe, categ_var, shape= 'seahorse', cmap= 'tab1
     while shape not in ['dino', 'heart', 'star', 'seahorse', 'hashtag']:    
         shape = input('Try again, what shape do you want for your figure words graph?\n*Dino\n*Heart\n*Star\n*Seahorse: ').lower()
     if shape == 'seahorse':
-        figure = 'data/viz/seahorse_visualizeME.jpg'
+        figure = './data/viz/seahorse_visualizeME.jpg'
     elif shape == 'dino':
-        figure = 'data/viz/dino_steg_visualizeME.jpg'
+        figure = './data/viz/dino_steg_visualizeME.jpg'
     elif shape == 'heart': 
-        figure = 'data/viz/corazon_visualizeME.png'
+        figure = './data/viz/corazon_visualizeME.png'
     elif shape == 'star':
-        figure = 'data/viz/estrella-silueta_visualizeME.png'  
+        figure = './data/viz/estrella-silueta_visualizeME.png'  
     elif shape == 'hashtag':
-        figure = 'data/viz/hashtag-silueta_visualizeME.png'
+        figure = './data/viz/hashtag-silueta_visualizeME.png'
     
     # Words
     words = ' '.join(map(str, dataframe[categ_var]))
@@ -227,9 +227,7 @@ def visualizeME_FigureWords(dataframe, categ_var, shape= 'seahorse', cmap= 'tab1
 
     # Save Graph
     if save == True:
-        figure = figure.split('/')[1]
-        figure = figure.split('.')[0]
-        name = 'visualizeME_Graphic_' + figure + '.png'
+        name = 'visualizeME_Graphic_' + shape + '.png'
         plt.savefig(name)
     
     return plt.show()
