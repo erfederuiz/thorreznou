@@ -1,0 +1,7 @@
+include src/thorreznou/data/viz/corazon_visualizeME.png
+include src/thorreznou/data/viz/dino_steg_visualizeME.jpg
+include src/thorreznou/data/viz/estrella-silueta_visualizeME.png
+include src/thorreznou/data/viz/hashtag-silueta_visualizeME.png
+include src/thorreznou/data/viz/seaborn_color_list.csv
+include src/thorreznou/data/viz/seahorse_visualizeME.jpg
+global-exclude test_*.py
