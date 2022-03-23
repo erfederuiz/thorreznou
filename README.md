@@ -1,9 +1,9 @@
-<<<<<<< HEAD
+
 # THORREZNOU
 PYTHON Library for exploratory data analysis and machine learning projects
 
 Here you can find the visualization functions
-=======
+
 
 # Thorreznou Library 🖥
 
@@ -68,6 +68,3 @@ pip install thorreznou
 - Project Manager: Miguel
 
 
-
-
->>>>>>> 67c2d24d817b2f89c5d97c0e52113dbce1307567
