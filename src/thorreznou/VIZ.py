@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 from scipy.stats import iqr
 from IPython.display import display
 import os
+import site
+import sys
 
 from sklearn.metrics import accuracy_score, confusion_matrix, f1_score, precision_score, recall_score, roc_auc_score
 from sklearn.metrics import classification_report
@@ -13,6 +15,30 @@ from sklearn.metrics import classification_report
 from wordcloud import WordCloud
 from PIL import Image
 
+if 'thorreznou' in sys.modules.keys():
+    path_viz = site.getsitepackages()[0] + '/thorreznou/data/viz/'
+else:
+    path_viz = './data/viz/'
+
+def get_resource_file(root_dir,file_name):
+  """Returns a resource as an opened read-only file.
+
+  Args:
+    path: Relative path to the resource, which must be a Bazel data dependency.
+
+  Returns:
+    Opened read-only file pointing to resource data.
+
+  Raises:
+    IOError: If the resource cannot be loaded.
+  """
+  path = os.path.join(root_dir, file_name)
+  if os.path.isdir(path):
+    raise IOError('Resource "{}" is not a file'.format(path))
+  if not os.path.isfile(path):
+    raise IOError(
+        'Resource "{}" not found; is it a data dependency?'.format(path))
+  return open(path, 'rb')
 
 # FUNCION 1
 def visualizeME_palettes_or_colors(selection = 'palettes', quantity_colors= 8):
@@ -24,7 +50,8 @@ def visualizeME_palettes_or_colors(selection = 'palettes', quantity_colors= 8):
     ### Return (1):
         * plt.show(): available palettes/ colors with their respective names
     '''
-    colors = pd.read_csv('./data/viz/seaborn_color_list.csv')
+    colors_file = get_resource_file(path_viz, 'seaborn_color_list.csv')
+    colors = pd.read_csv(colors_file)
 
     if selection == 'palettes':
         grid = np.vstack((np.linspace(0, 1, quantity_colors), np.linspace(0, 1, quantity_colors)))
@@ -199,19 +226,19 @@ def visualizeME_FigureWords(dataframe, categ_var, shape= 'seahorse', cmap= 'tab1
     while shape not in ['dino', 'heart', 'star', 'seahorse', 'hashtag']:    
         shape = input('Try again, what shape do you want for your figure words graph?\n*Dino\n*Heart\n*Star\n*Seahorse: ').lower()
     if shape == 'seahorse':
-        figure = './data/viz/seahorse_visualizeME.jpg'
+        figure = 'seahorse_visualizeME.jpg'
     elif shape == 'dino':
-        figure = './data/viz/dino_steg_visualizeME.jpg'
+        figure = 'dino_steg_visualizeME.jpg'
     elif shape == 'heart': 
-        figure = './data/viz/corazon_visualizeME.png'
+        figure = 'corazon_visualizeME.png'
     elif shape == 'star':
-        figure = './data/viz/estrella-silueta_visualizeME.png'  
+        figure = 'estrella-silueta_visualizeME.png'
     elif shape == 'hashtag':
-        figure = './data/viz/hashtag-silueta_visualizeME.png'
+        figure = 'hashtag-silueta_visualizeME.png'
     
     # Words
     words = ' '.join(map(str, dataframe[categ_var]))
-    custom_mask = np.array(Image.open(figure))
+    custom_mask = np.array(Image.open(get_resource_file(path_viz, figure)))
     wordcloud = WordCloud(background_color=back_color,
                       width=2500,
                       height=2000,
